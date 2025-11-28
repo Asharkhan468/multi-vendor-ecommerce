@@ -45,7 +45,7 @@ export default function InventoryStatus() {
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-8 mt-12">
       {/* Heading */}
 
       {/* Top Inventory Stats */}
@@ -59,7 +59,7 @@ export default function InventoryStatus() {
 
             <div>
               <p className="text-gray-600 text-sm">{item.title}</p>
-              <h3 className="text-2xl font-bold">{item.count}</h3>
+              <h3 className="text-2xl font-bold text-black">{item.count}</h3>
             </div>
           </div>
         ))}

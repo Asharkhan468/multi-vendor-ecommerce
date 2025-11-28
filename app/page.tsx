@@ -4,8 +4,9 @@ import InventoryStatus from "@/components/InventoryVendor";
 import OrdersDashboard from "@/components/OrderPageVendor";
 import OrderStatus from "@/components/OrderStatusVendor";
 import Sidebar from "@/components/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MoreVertical, Plus } from "lucide-react";
+import AddProduct from "@/components/AddProduct";
 
 const productsData = [
   {
@@ -33,26 +34,39 @@ const productsData = [
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("Home");
+  const [openAddProduct, setOpenAddProduct] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const closeMenu = () => setOpenMenuId(null);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, []);
 
   const handleAddProduct = () => {
-    alert("Open add product form here!");
+    setOpenAddProduct(true);
   };
 
   const handleEditProduct = (id: number) => {
-    alert(`Edit product with ID: ${id}`);
+    //edit function
   };
 
   const handleDeleteProduct = (id: number) => {
-    alert(`Delete product with ID: ${id}`);
+    //delete function
   };
 
   return (
     <div className="flex h-screen bg-gray-100 relative">
       {/* Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {openAddProduct && (
+        <>
+          <AddProduct onClose={() => setOpenAddProduct(false)} />
+        </>
+      )}
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 p-6 overflow-auto mt-11 md:mt-0">
         <h2 className="text-3xl font-bold mb-6 text-black">{activeTab}</h2>
 
         {activeTab === "Home" && (
@@ -64,13 +78,38 @@ export default function VendorDashboard() {
                  hover:shadow-xl hover:-translate-y-1 transition-all duration-300
                  hover:border-purple-400/60 hover:shadow-purple-200 relative"
               >
-                {/* 3 Dots Menu */}
                 <button
-                  onClick={() => handleEditProduct(product.id)}
-                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                  // onClick={() =>
+                  //   setOpenMenuId(openMenuId === product.id ? null : product.id)
+                  // }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(
+                      openMenuId === product.id ? null : product.id
+                    );
+                  }}
+                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
                 >
-                  <MoreVertical size={20} />
+                  <MoreVertical size={22} />
                 </button>
+
+                {/* Dropdown Menu */}
+                {openMenuId === product.id && (
+                  <div className="absolute top-10 right-3 bg-white shadow-lg rounded-lg border w-32 z-50 animate-fade-in">
+                    <button
+                      onClick={() => handleEditProduct(product.id)}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
 
                 {/* Images */}
                 <div className="flex gap-3 mb-4 overflow-x-auto pb-2">
@@ -106,14 +145,6 @@ export default function VendorDashboard() {
                     <span className="text-blue-600">{product.category}</span>
                   </p>
                 </div>
-
-                {/* Delete Button */}
-                <button
-                  onClick={() => handleDeleteProduct(product.id)}
-                  className="mt-3 self-start text-red-500 hover:text-red-700 text-sm"
-                >
-                  Delete
-                </button>
               </div>
             ))}
           </div>
