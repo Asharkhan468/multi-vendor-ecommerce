@@ -6,9 +6,15 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
 import { Users, UserCog, Boxes } from "lucide-react";
+import AdminProductsTable from "@/components/AdminProducts";
+import AdminVendorsTable from "@/components/AdminVendors";
+import AdminUsersTable from "@/components/AdminUsers";
+import AdminOrdersComponent from "@/components/AdminOrders";
+import AdminCategoriesComponent from "@/components/AdminCategories";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("Admin Home");
+  const [activeTab, setActiveTab] = useState("Home");
+  
 
   // Dashboard Stats
   const stats = [
@@ -27,6 +33,108 @@ export default function AdminDashboard() {
     { name: "Jun", users: 900, products: 500 },
   ];
 
+  //products
+
+  const productsList = [
+  {
+    id: "1",
+    title: "iPhone 14 Pro",
+    price: 1200,
+    stock: 15,
+    category: "Mobiles",
+    image: "/iphone.png",
+  },
+  {
+    id: "2",
+    title: "Nike Shoes",
+    price: 200,
+    stock: 5,
+    category: "Footwear",
+    image: "/shoes.png",
+  },
+];
+
+//users
+
+const usersData = [
+  {
+    id: "u1",
+    name: "John Carter",
+    email: "john.carter@example.com",
+    role: "Customer",
+    image:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&q=80",
+  },
+  {
+    id: "u2",
+    name: "Sophia Martinez",
+    email: "sophia.m@example.com",
+    role: "Customer",
+    image:
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&q=80",
+  },
+  {
+    id: "u3",
+    name: "David Wilson",
+    email: "david.wilson@example.com",
+    role: "Customer",
+    image:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80",
+  },
+  {
+    id: "u4",
+    name: "Emily Johnson",
+    email: "emily.j@example.com",
+    role: "Customer",
+    image:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80",
+  },
+];
+
+
+//vendors
+
+
+const vendorsData = [
+  {
+    id: "v1",
+    shopName: "Tech Gear Store",
+    ownerName: "Michael Smith",
+    email: "michael@techgear.com",
+    status: "Active",
+    image:
+      "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=300&q=80",
+  },
+  {
+    id: "v2",
+    shopName: "Fashion Hub",
+    ownerName: "Ava Thompson",
+    email: "ava@fashionhub.com",
+    status: "Inactive",
+    image:
+      "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=300&q=80",
+  },
+  {
+    id: "v3",
+    shopName: "Smart Electronics",
+    ownerName: "Daniel Evans",
+    email: "daniel@smartelectronics.com",
+    status: "Active",
+    image:
+      "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=300&q=80",
+  },
+  {
+    id: "v4",
+    shopName: "Trendy Collections",
+    ownerName: "Isabella Clark",
+    email: "isabella@trendy.com",
+    status: "Active",
+    image:
+      "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300&q=80",
+  },
+];
+
+
   return (
     <div className="flex h-screen bg-gray-100">
 
@@ -37,11 +145,14 @@ export default function AdminDashboard() {
       <main className="flex-1 p-6 overflow-auto mt-11 md:mt-0">
 
         <h1 className="text-3xl font-bold mb-6 text-gray-800">
-          Admin Dashboard
+          {activeTab}
         </h1>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+       {
+        activeTab=="Home" &&(
+          <>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {stats.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -84,7 +195,32 @@ export default function AdminDashboard() {
           </div>
 
         </div>
+          </>
+        )
+       }
+          {
+        activeTab =="Products" && <AdminProductsTable  products={productsList}
+      onEdit={(id) => console.log("Edit", id)}
+      onDelete={(id) => console.log("Delete", id)}/>
+      }
+      {
+        activeTab =="Vendors" && <AdminVendorsTable  vendors={vendorsData}
+      onEdit={(id) => console.log("Edit", id)}
+      onDelete={(id) => console.log("Delete", id)}/>
+      }
+      {
+        activeTab =="Users" && <AdminUsersTable users={usersData}
+      onEdit={(id) => console.log("Edit", id)}
+      onDelete={(id) => console.log("Delete", id)}/>
+      }
+       {
+        activeTab =="Orders" && <AdminOrdersComponent/>
+      }
+      {
+        activeTab =="Categories" && <AdminCategoriesComponent/>
+      }
       </main>
+    
     </div>
   );
 }

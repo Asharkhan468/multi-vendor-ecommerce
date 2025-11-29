@@ -19,6 +19,8 @@ import { usePathname } from "next/navigation";
 export default function Sidebar({ activeTab, setActiveTab }: any) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const pannelName= path.includes("/admin")?"Admin Pannel":"Vendor Pannel";
+
 
  
   const vendorTabs = [
@@ -29,12 +31,12 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
   ];
 
  const adminTabs = [
-  { name: "Home", icon: Home },               // Dashboard / Home
-  { name: "Products", icon: ShoppingCart },   // Products
-  { name: "Vendors", icon: UserCog },        // Vendors
-  { name: "Users", icon: Users },            // Users
-  { name: "Orders", icon: Archive },         // Orders
-  { name: "Categories", icon: Layers },      // Categories
+  { name: "Home", icon: Home },               
+  { name: "Products", icon: ShoppingCart },  
+  { name: "Vendors", icon: UserCog },        
+  { name: "Users", icon: Users },           
+  { name: "Orders", icon: Archive },         
+  { name: "Categories", icon: Layers },     
 ];
 
   const tabs = path.includes("/admin")?adminTabs:vendorTabs;
@@ -47,7 +49,7 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
     <>
       {/* ===== MOBILE TOP BAR ===== */}
       <div className="md:hidden fixed top-0 left-0 w-full flex justify-between items-center px-4 py-3 bg-indigo-600 text-white z-50">
-        <h1 className="text-xl font-bold">Vendor Panel</h1>
+        <h1 className="text-xl font-bold">{pannelName}</h1>
         <Menu className="w-7 h-7" onClick={() => setOpen(true)} />
       </div>
 
@@ -72,7 +74,7 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
         <div>
           {/* Desktop Heading */}
           <h1 className="hidden md:block text-2xl font-bold p-6 border-b border-indigo-500">
-            Vendor Panel
+            {pannelName}
           </h1>
 
           {/* Close Button for Mobile */}
