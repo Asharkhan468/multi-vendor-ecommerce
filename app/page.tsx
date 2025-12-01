@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ShoppingCart, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Header from "@/components/UserHeader";
 
 type Product = {
   id: string;
@@ -10,6 +11,8 @@ type Product = {
   price: number;
   image: string;
   category: string;
+  vendor: string;
+  dateAdded: string;
 };
 
 const demoProducts: Product[] = [
@@ -19,6 +22,8 @@ const demoProducts: Product[] = [
     price: 799,
     image: "https://via.placeholder.com/400x300?text=Smartphone+X",
     category: "Electronics",
+    vendor: "Apple",
+    dateAdded: "2024-01-10",
   },
   {
     id: "2",
@@ -26,6 +31,8 @@ const demoProducts: Product[] = [
     price: 199,
     image: "https://via.placeholder.com/400x300?text=Headphones",
     category: "Electronics",
+    vendor: "Sony",
+    dateAdded: "2024-02-05",
   },
   {
     id: "3",
@@ -33,6 +40,8 @@ const demoProducts: Product[] = [
     price: 1299,
     image: "https://via.placeholder.com/400x300?text=Gaming+Laptop",
     category: "Computers",
+    vendor: "Dell",
+    dateAdded: "2024-03-02",
   },
   {
     id: "4",
@@ -40,60 +49,168 @@ const demoProducts: Product[] = [
     price: 299,
     image: "https://via.placeholder.com/400x300?text=Smart+Watch",
     category: "Wearables",
+    vendor: "Samsung",
+    dateAdded: "2024-01-30",
+  },
+  {
+    id: "5",
+    title: "Smart Watch",
+    price: 299,
+    image: "https://via.placeholder.com/400x300?text=Smart+Watch",
+    category: "Wearables",
+    vendor: "Samsung",
+    dateAdded: "2024-01-30",
+  },
+  {
+    id: "6",
+    title: "Smart Watch",
+    price: 299,
+    image: "https://via.placeholder.com/400x300?text=Smart+Watch",
+    category: "Wearables",
+    vendor: "Samsung",
+    dateAdded: "2024-01-30",
+  },
+  {
+    id: "7",
+    title: "Smart Watch",
+    price: 299,
+    image: "https://via.placeholder.com/400x300?text=Smart+Watch",
+    category: "Wearables",
+    vendor: "Samsung",
+    dateAdded: "2024-01-30",
+  },
+  {
+    id: "8",
+    title: "Smart Watch",
+    price: 299,
+    image: "https://via.placeholder.com/400x300?text=Smart+Watch",
+    category: "Wearables",
+    vendor: "Samsung",
+    dateAdded: "2024-01-30",
   },
 ];
 
 export default function HomePage() {
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [vendor, setVendor] = useState("");
+  const [priceFilter, setPriceFilter] = useState("");
+  const [sort, setSort] = useState("");
+
   const router = useRouter();
 
-  const filteredProducts = demoProducts.filter((product) =>
-    product.title.toLowerCase().includes(search.toLowerCase())
-  );
+  // ======== Filtering ========
+  let filteredProducts = demoProducts.filter((product) => {
+    return (
+      product.title.toLowerCase().includes(search.toLowerCase()) &&
+      (category ? product.category === category : true) &&
+      (vendor ? product.vendor === vendor : true)
+    );
+  });
+
+  // ======== Price Filter ========
+  if (priceFilter === "low") {
+    filteredProducts = filteredProducts.filter((p) => p.price < 500);
+  }
+  if (priceFilter === "medium") {
+    filteredProducts = filteredProducts.filter((p) => p.price >= 500 && p.price <= 1000);
+  }
+  if (priceFilter === "high") {
+    filteredProducts = filteredProducts.filter((p) => p.price > 1000);
+  }
+
+  // ======== Sorting ========
+  if (sort === "low-high") {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  }
+  if (sort === "high-low") {
+    filteredProducts.sort((a, b) => b.price - a.price);
+  }
+  if (sort === "newest") {
+    filteredProducts.sort(
+      (a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
+
       {/* ================= Header ================= */}
-     <header className="bg-indigo-600 text-white shadow-md py-4">
-  <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <Header search={search} setSearch={setSearch} />
 
-    {/* Logo */}
-    <h1 className="text-3xl font-bold tracking-wide">
-      Premium Store
-    </h1>
 
-    {/* RIGHT SIDE GROUP: Search + Cart */}
-    <div className="flex items-center gap-6">
+      {/* ================= Filters ================= */}
+      <div className="max-w-7xl mx-auto px-6 mt-8">
+        <h2 className="text-xl font-semibold mb-4 text-black">Filters</h2>
 
-      {/* Search Box */}
-      <div className="relative w-64">
-        <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          size={18}
-        />
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white text-gray-800 pl-10 pr-4 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
-        />
-      </div>
+       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-      {/* Cart Icon */}
-      <div className="relative cursor-pointer hover:scale-110 transition">
-        <ShoppingCart size={28} />
-        <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
-          0
-        </span>
-      </div>
-
-    </div>
+  {/* Category */}
+  <div className="relative">
+    <select
+      className="p-3 pr-10 rounded-xl border border-gray-400 bg-white text-gray-900 font-semibold appearance-none w-full"
+      value={category}
+      onChange={(e) => setCategory(e.target.value)}
+    >
+      <option value="">All Categories</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Computers">Computers</option>
+      <option value="Wearables">Wearables</option>
+    </select>
+    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">⏷</span>
   </div>
-</header>
 
+  {/* Vendor */}
+  <div className="relative">
+    <select
+      className="p-3 pr-10 rounded-xl border border-gray-400 bg-white text-gray-900 font-semibold appearance-none w-full"
+      value={vendor}
+      onChange={(e) => setVendor(e.target.value)}
+    >
+      <option value="">All Vendors</option>
+      <option value="Apple">Apple</option>
+      <option value="Sony">Sony</option>
+      <option value="Dell">Dell</option>
+      <option value="Samsung">Samsung</option>
+    </select>
+    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">⏷</span>
+  </div>
 
-      {/* ================ Products Section ================= */}
+  {/* Price */}
+  <div className="relative">
+    <select
+      className="p-3 pr-10 rounded-xl border border-gray-400 bg-white text-gray-900 font-semibold appearance-none w-full"
+      value={priceFilter}
+      onChange={(e) => setPriceFilter(e.target.value)}
+    >
+      <option value="">All Prices</option>
+      <option value="low">Low (&lt; $500)</option>
+      <option value="medium">Medium ($500 - $1000)</option>
+      <option value="high">High (&gt; $1000)</option>
+    </select>
+    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">⏷</span>
+  </div>
+
+  {/* Sorting */}
+  <div className="relative">
+    <select
+      className="p-3 pr-10 rounded-xl border border-gray-400 bg-white text-gray-900 font-semibold appearance-none w-full"
+      value={sort}
+      onChange={(e) => setSort(e.target.value)}
+    >
+      <option value="">Sort By</option>
+      <option value="low-high">Price: Low to High</option>
+      <option value="high-low">Price: High to Low</option>
+      <option value="newest">Newest</option>
+    </select>
+    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">⏷</span>
+  </div>
+
+</div>
+
+      </div>
+
+      {/* ================= Products Section ================= */}
       <main className="max-w-7xl mx-auto px-6 py-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
           Featured Products
@@ -106,27 +223,19 @@ export default function HomePage() {
               onClick={() => router.push(`/products/${product.id}`)}
               className="bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 cursor-pointer"
             >
-              <img
-                src={product.image}
-                alt={product.title}
-                className="w-full h-56 object-cover"
-              />
+              <img src={product.image} alt={product.title} className="w-full h-56 object-cover" />
+
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {product.title}
-                </h3>
-                <p className="text-gray-500 mt-1">{product.category}</p>
+                <h3 className="text-lg font-semibold text-gray-800">{product.title}</h3>
+                <p className="text-gray-500">{product.category} • {product.vendor}</p>
 
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xl font-bold text-gray-900">
-                    ${product.price}
-                  </span>
+                  <span className="text-xl font-bold text-gray-700">${product.price}</span>
 
                   <button className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
                     <ShoppingCart size={18} />
                     Add to Cart
                   </button>
-
                 </div>
               </div>
             </div>
