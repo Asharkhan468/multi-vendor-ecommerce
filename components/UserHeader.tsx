@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ShoppingCart, Search } from "lucide-react";
+import { ShoppingCart, Search, User, PackageSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type HeaderProps = {
@@ -20,12 +20,12 @@ export default function Header({ search, setSearch }: HeaderProps) {
           {/* Logo */}
           <h1
             className="text-3xl font-bold tracking-wide cursor-pointer"
-            onClick={() => router.push("/")} // Navigate to home
+            onClick={() => router.push("/")}
           >
             Premium Store
           </h1>
 
-          {/* Search + Cart */}
+          {/* Search + Cart + Profile + Order Status */}
           <div className="flex items-center gap-6">
             {/* Search */}
             <div className="relative w-64">
@@ -41,6 +41,23 @@ export default function Header({ search, setSearch }: HeaderProps) {
                 className="w-full bg-white text-gray-800 pl-10 pr-4 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
+
+            {/* Order Status */}
+            <div
+              className="cursor-pointer flex items-center gap-2 hover:text-gray-200 transition"
+              onClick={() => router.push("/orderStatus")}
+            >
+              <PackageSearch size={24} />
+              <span className="text-sm font-medium">Order Status</span>
+            </div>
+
+            {/* Profile Image (or default icon) */}
+            <img
+              src="/profile.png"
+              onClick={() => router.push("/profile")}
+              className="w-10 h-10 rounded-full border-2 border-white cursor-pointer hover:scale-110 transition object-cover"
+              alt="Profile"
+            />
 
             {/* Cart */}
             <div
@@ -60,20 +77,36 @@ export default function Header({ search, setSearch }: HeaderProps) {
           {/* Logo */}
           <h1
             className="text-2xl font-bold tracking-wide cursor-pointer"
-            onClick={() => router.push("/")} // Navigate to home
+            onClick={() => router.push("/")}
           >
             Premium Store
           </h1>
 
-          {/* Cart */}
-          <div
-            className="relative cursor-pointer hover:scale-110 transition"
-            onClick={() => router.push("/cart")}
-          >
-            <ShoppingCart size={26} />
-            <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
-              0
-            </span>
+          <div className="flex items-center gap-4">
+            {/* Profile Image */}
+            <img
+              src="/profile.png"
+              onClick={() => router.push("/profile")}
+              className="w-9 h-9 rounded-full border border-white cursor-pointer"
+            />
+
+            {/* Order Status Icon */}
+            <PackageSearch
+              size={26}
+              className="cursor-pointer"
+              onClick={() => router.push("/orderStatus")}
+            />
+
+            {/* Cart */}
+            <div
+              className="relative cursor-pointer hover:scale-110 transition"
+              onClick={() => router.push("/cart")}
+            >
+              <ShoppingCart size={26} />
+              <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
+                0
+              </span>
+            </div>
           </div>
         </div>
 
