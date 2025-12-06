@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import {loginUser} from '../../../libs/api'
+import { useRouter } from "next/navigation";
+
 
 export default function LoginPage() {
   const [form, setForm] = useState({
@@ -15,9 +18,22 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e: any) => {
+  const router = useRouter();
+
+  const handleLogin = async(e: any) => {
     e.preventDefault();
     console.log(form);
+    // loginUser(form.email , form.password);
+      const res = await loginUser(form.email, form.password);
+
+    if (res.success) {
+      alert("Logged in sucessfully!")
+      router.push("/");
+    } else {
+      alert(res.message || "Invalid credentials ❌");
+
+    }
+    
   };
 
   return (
