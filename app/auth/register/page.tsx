@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { RegisterUser } from "@/libs/api";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -12,14 +15,30 @@ export default function RegisterPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  const handleRegister = (e:any) => {
+  const router = useRouter();
+  const handleRegister = async (e: any) => {
     e.preventDefault();
-    console.log(form);
+    setLoading(true);
+    const res = await RegisterUser(
+      form.name,
+      form.email,
+      form.password,
+      form.role
+    );
+
+    if (res.success) {
+      setLoading(false);
+      toast.success("Account Created Sucessfully!");
+      router.push("/auth/login");
+    } else {
+      setLoading(false);
+      toast.error(res.message);
+    }
   };
 
   return (
@@ -32,7 +51,9 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-5">
           {/* Name */}
           <div>
-            <label className="text-gray-700 text-sm font-medium">Full Name</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Full Name
+            </label>
             <input
               type="text"
               name="name"
@@ -47,7 +68,9 @@ export default function RegisterPage() {
 
           {/* Email */}
           <div>
-            <label className="text-gray-700 text-sm font-medium">Email Address</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
@@ -62,7 +85,9 @@ export default function RegisterPage() {
 
           {/* Password */}
           <div>
-            <label className="text-gray-700 text-sm font-medium">Password</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -86,33 +111,54 @@ export default function RegisterPage() {
 
           {/* Role */}
           <div>
-  <label className="text-gray-700 text-sm font-medium">Select Role</label>
-  <select
-    name="role"
-    value={form.role}
-    onChange={handleChange}
-    className="w-full mt-1 px-4 py-3 pr-10 rounded-xl bg-gray-100 text-gray-900 outline-none border border-gray-300 
+            <label className="text-gray-700 text-sm font-medium">
+              Select Role
+            </label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 pr-10 rounded-xl bg-gray-100 text-gray-900 outline-none border border-gray-300 
     focus:border-indigo-500 transition cursor-pointer appearance-none"
-  >
-    <option value="customer">Customer</option>
-    <option value="vendor">Vendor</option>
-  </select>
-</div>
-
+            >
+              <option value="customer">Customer</option>
+              <option value="vendor">Vendor</option>
+            </select>
+          </div>
 
           {/* Button */}
-          <button
+          {/* <button
             type="submit"
             className="w-full py-3 mt-2 rounded-xl bg-indigo-600 text-white font-semibold 
             hover:bg-indigo-700 transition shadow-md"
           >
             Register
+          </button> */}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 mt-2 rounded-xl font-semibold shadow-md transition flex items-center justify-center 
+    ${
+      loading
+        ? "bg-indigo-400 cursor-not-allowed"
+        : "bg-indigo-600 hover:bg-indigo-700 text-white"
+    }`}
+          >
+            {loading ? (
+              <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              "Register"
+            )}
           </button>
         </form>
 
         <p className="text-center text-gray-600 text-sm mt-4">
           Already have an account?{" "}
-          <a href="/auth/login" className="text-indigo-600 font-medium hover:underline">
+          <a
+            href="/auth/login"
+            className="text-indigo-600 font-medium hover:underline"
+          >
             Login
           </a>
         </p>
