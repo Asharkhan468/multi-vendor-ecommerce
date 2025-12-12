@@ -60,9 +60,9 @@ interface Props {
 export default function ProductDetailPage() {
   const router = useRouter();
   const { id } = useParams();
-  const [search , setSearch]=useState("");
+  const [search, setSearch] = useState("");
 
-  console.log(id , 'params')
+  console.log(id, "params");
 
   const product = demoProducts.find((p) => p.id === id);
 
@@ -77,8 +77,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-            <Header search={search} setSearch={setSearch} />
-
+      <Header search={search} setSearch={setSearch} />
 
       {/* Product Detail */}
       <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">

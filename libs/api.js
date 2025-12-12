@@ -67,7 +67,8 @@ export const createProduct = async (
   description,
   price,
   category,
-  selectedFile
+  selectedFile,
+  stock,
 ) => {
   try {
     const formData = new FormData();
@@ -75,7 +76,8 @@ export const createProduct = async (
     formData.append("description", description);
     formData.append("price", price);
     formData.append("category", category);
-    formData.append("image", selectedFile); // VERY IMPORTANT
+    formData.append("image", selectedFile); 
+    formData.append("stock", stock); 
 
     const res = await fetch(`${baseUrl}api/products`, {
       method: "POST",
@@ -99,6 +101,28 @@ export const getAllProduct = async () => {
 
     if (!res.ok) {
       return { success: false, message: "Failed to fetch products" };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+
+export const getAllCategories = async () => {
+  try {
+    const res = await fetch(`${baseUrl}api/categories/all`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to fetch categories" };
     }
 
     const data = await res.json();

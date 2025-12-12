@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Upload, X } from "lucide-react";
-import { createProduct } from "@/libs/api";
+import { createProduct, getAllCategories } from "@/libs/api";
 import { toast } from "react-toastify";
 
 export default function AddProduct({ onClose }: any) {
@@ -13,6 +13,7 @@ export default function AddProduct({ onClose }: any) {
   const [stock, setStock] = useState("");
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [categoryList, setCategoryList] = useState([]);
 
   const handleImageUpload = (e: any) => {
     const files = Array.from(e.target.files);
@@ -24,6 +25,21 @@ export default function AddProduct({ onClose }: any) {
 
     setImages([...images, ...newImages]);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getAllCategories();
+
+      if (res.success) {
+        setCategoryList(res.data.data);
+        setLoading(false);
+      } else {
+        console.log(res.message);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSubmit = async () => {
     try {
@@ -38,12 +54,15 @@ export default function AddProduct({ onClose }: any) {
       }
       setLoading(true);
       // API Call
+
+      console.log(stock, "this is stock");
       const res = await createProduct(
         title,
         desc,
         price,
         category,
-        images[0].file
+        images[0].file,
+        stock
       );
       console.log(res);
       if (res?.success) {
@@ -114,13 +133,62 @@ export default function AddProduct({ onClose }: any) {
           </div>
 
           {/* Category */}
-          <input
-            type="text"
-            placeholder="Category"
-            className="input-field"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          />
+          <div className="relative">
+            <div className="relative">
+              <select
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 
+               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500
+               appearance-none"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="" disabled>
+                  Select Category
+                </option>
+                {categoryList.map((cat: any, idx: any) => (
+                  <option key={idx} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Arrow Icon */}
+              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Arrow Icon */}
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
 
           {/* Image Upload Box */}
           <label className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition">

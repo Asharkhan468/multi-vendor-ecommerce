@@ -9,43 +9,31 @@ import { MoreVertical, Plus } from "lucide-react";
 import AddProduct from "@/components/AddProduct";
 import { getAllProduct } from "@/libs/api";
 
-// const productsData = [
-//   {
-//     id: 1,
-//     title: "Product 1",
-//     description: "This is product 1 description.",
-//     images: [
-//       "https://via.placeholder.com/150",
-//       "https://via.placeholder.com/150",
-//     ],
-//     price: "50",
-//     stock: 20,
-//     category: "Electronics",
-//   },
-//   {
-//     id: 2,
-//     title: "Product 2",
-//     description: "This is product 2 description.",
-//     images: ["https://via.placeholder.com/150"],
-//     price: "30",
-//     stock: 15,
-//     category: "Clothing",
-//   },
-// ];
-
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("Home");
   const [openAddProduct, setOpenAddProduct] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [products, setProducts] = useState([]);
 
-  
-
   console.log(products);
   useEffect(() => {
     const closeMenu = () => setOpenMenuId(null);
     window.addEventListener("click", closeMenu);
     return () => window.removeEventListener("click", closeMenu);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getAllProduct();
+
+      if (res.success) {
+        setProducts(res.data.products);
+      } else {
+        console.log(res.message);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleAddProduct = () => {
@@ -114,16 +102,14 @@ export default function VendorDashboard() {
                 )}
 
                 {/* Images */}
-                {/* <div className="flex gap-3 mb-4 overflow-x-auto pb-2">
-                  {product.images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      src={img}
-                      alt={product.title}
-                      className="w-28 h-28 object-cover rounded-lg shadow-sm hover:scale-105 transition-all duration-300"
-                    />
-                  ))}
-                </div> */}
+
+                <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
+                  <img
+                    src={product.image.url}
+                    alt={product.title}
+                    className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
+                  />
+                </div>
 
                 {/* Details */}
                 <h3 className="text-xl font-bold text-gray-800 mb-1">
