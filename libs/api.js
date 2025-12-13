@@ -67,8 +67,8 @@ export const createProduct = async (
   description,
   price,
   category,
-  selectedFile,
   stock,
+  selectedFile
 ) => {
   try {
     const formData = new FormData();
@@ -76,12 +76,12 @@ export const createProduct = async (
     formData.append("description", description);
     formData.append("price", price);
     formData.append("category", category);
-    formData.append("image", selectedFile); 
-    formData.append("stock", stock); 
+    formData.append("image", selectedFile);
+    formData.append("stock", stock);
 
     const res = await fetch(`${baseUrl}api/products`, {
       method: "POST",
-      body: formData, // no headers
+      body: formData, 
     });
 
     const data = await res.json();
@@ -94,9 +94,6 @@ export const getAllProduct = async () => {
   try {
     const res = await fetch(`${baseUrl}api/products`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     if (!res.ok) {
@@ -110,7 +107,6 @@ export const getAllProduct = async () => {
     return { success: false, message: "Something went wrong" };
   }
 };
-
 
 export const getAllCategories = async () => {
   try {

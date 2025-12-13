@@ -54,15 +54,13 @@ export default function AddProduct({ onClose }: any) {
       }
       setLoading(true);
       // API Call
-
-      console.log(stock, "this is stock");
       const res = await createProduct(
         title,
         desc,
         price,
         category,
-        images[0].file,
-        stock
+        stock,
+        images[0].file
       );
       console.log(res);
       if (res?.success) {
@@ -104,7 +102,6 @@ export default function AddProduct({ onClose }: any) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-
           {/* Description */}
           <textarea
             placeholder="Product Description"
@@ -112,7 +109,6 @@ export default function AddProduct({ onClose }: any) {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
-
           {/* Price + Stock */}
           <div className="grid grid-cols-2 gap-4">
             <input
@@ -131,7 +127,6 @@ export default function AddProduct({ onClose }: any) {
               onChange={(e) => setStock(e.target.value)}
             />
           </div>
-
           {/* Category */}
           <div className="relative">
             <div className="relative">
@@ -189,31 +184,43 @@ export default function AddProduct({ onClose }: any) {
               </svg>
             </div>
           </div>
-
           {/* Image Upload Box */}
-          <label className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition">
-            <Upload size={28} className="text-gray-500" />
-            <p className="text-gray-600 text-sm mt-2">Upload Product Images</p>
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleImageUpload}
-            />
-          </label>
-
-          {/* Image Preview */}
-          {images.length > 0 && (
-            <div className="grid grid-cols-3 gap-3 mt-3">
-              {images.map((img: any, idx: number) => (
-                <img
-                  key={idx}
-                  src={img.preview}
-                  className="w-full h-24 object-cover rounded-lg shadow"
+          {/* Image Upload Box with Preview & Remove */}
+          <label className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition relative">
+            {!images.length ? (
+              <>
+                <Upload size={28} className="text-gray-500" />
+                <p className="text-gray-600 text-sm mt-2">
+                  Upload Product Image
+                </p>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setImages([{ file, preview: URL.createObjectURL(file) }]);
+                    }
+                  }}
                 />
-              ))}
-            </div>
-          )}
+              </>
+            ) : (
+              <div className="relative w-full">
+                <img
+                  src={images[0].preview}
+                  className="w-full h-46 object-cover rounded-lg shadow"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImages([])}
+                  className="absolute top-2 right-2 bg-red-500 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            )}
+          </label>
 
           <button
             onClick={handleSubmit}
