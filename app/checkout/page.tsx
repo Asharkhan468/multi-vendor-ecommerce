@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Header from "@/components/UserHeader";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const [search, setSearch] = useState("");
@@ -16,13 +18,56 @@ export default function CheckoutPage() {
     payment: "cod",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const checkoutTotal = Number(localStorage.getItem("checkoutTotal"));
+  const router = useRouter();
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Order Placed Successfully!\nThank you for shopping with us.");
+
+    //  Get cart from localStorage
+    const cartProducts = JSON.parse(
+      localStorage.getItem("checkoutProducts") || "[]"
+    );
+
+    //  Map to only product IDs and quantities
+    const products = cartProducts.map((item: any) => ({
+      productId: item._id,
+      quantity: item.quantity,
+    }));
+
+    //  Calculate total (subtotal + shipping)
+    const shipping = 20;
+    const total = checkoutTotal + shipping;
+
+    const orderObject = {
+      customer: { ...form },
+      products,
+      totalAmount: total,
+      shippingAmount: shipping,
+      paymentMethod: form.payment,
+      orderDate: new Date().toISOString(),
+    };
+
+    console.log("Order Object:", orderObject);
+
+    localStorage.setItem("latestOrder", JSON.stringify(orderObject));
+
+    toast.success(
+      "Order Placed Successfully!\nThank you for shopping with us."
+    );
+
+    localStorage.removeItem("cart");
+    localStorage.removeItem("checkoutProducts");
+    localStorage.removeItem("checkoutTotal");
+    localStorage.removeItem("latestOrder");
+
+    router.push("/");
   };
 
   return (
@@ -34,10 +79,7 @@ export default function CheckoutPage() {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col lg:flex-row gap-6">
           {/* Left: User & Address Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex-1 space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="flex-1 space-y-5">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Delivery Details
             </h2>
@@ -145,7 +187,7 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               <div className="flex justify-between text-gray-700">
                 <span>Subtotal</span>
-                <span>$998</span>
+                <span>${checkoutTotal}</span>
               </div>
               <div className="flex justify-between text-gray-700">
                 <span>Shipping</span>
@@ -153,7 +195,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-gray-800 font-bold text-lg border-t border-gray-300 pt-3">
                 <span>Total</span>
-                <span>$1018</span>
+                <span>${checkoutTotal + 20}</span>
               </div>
             </div>
           </div>

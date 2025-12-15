@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ShoppingCart, Search, User, PackageSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -11,7 +11,14 @@ type HeaderProps = {
 
 export default function Header({ search, setSearch }: HeaderProps) {
   const router = useRouter();
+  const [cart , setCart]=useState([]);
 
+
+  useEffect(() => {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      setCart(cart);
+    }, []);
+  
   return (
     <header className="bg-indigo-600 text-white shadow-md py-4">
       <div className="max-w-7xl mx-auto px-6">
@@ -66,7 +73,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
             >
               <ShoppingCart size={26} />
               <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
-                0
+                {cart.length}
               </span>
             </div>
           </div>
@@ -104,7 +111,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
             >
               <ShoppingCart size={26} />
               <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
-                0
+              {cart.length}
               </span>
             </div>
           </div>

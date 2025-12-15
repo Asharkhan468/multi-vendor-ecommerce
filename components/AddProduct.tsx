@@ -185,7 +185,6 @@ export default function AddProduct({ onClose }: any) {
             </div>
           </div>
           {/* Image Upload Box */}
-          {/* Image Upload Box with Preview & Remove */}
           <label className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition relative">
             {!images.length ? (
               <>
@@ -196,7 +195,7 @@ export default function AddProduct({ onClose }: any) {
                 <input
                   type="file"
                   className="hidden"
-                  accept="image/*"
+                  accept=".jpg,.jpeg,.png"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {

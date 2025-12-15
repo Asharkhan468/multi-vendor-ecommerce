@@ -1,64 +1,68 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Trash2, Plus, Minus } from "lucide-react";
 import Header from "@/components/UserHeader";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
-  const [cart, setCart] = useState([
-    {
-      id: 1,
-      title: "Smartphone X",
-      price: 799,
-      quantity: 1,
-      image: "https://via.placeholder.com/400x300?text=Smartphone+X",
-    },
-    {
-      id: 2,
-      title: "Wireless Headphones",
-      price: 199,
-      quantity: 2,
-      image: "https://via.placeholder.com/400x300?text=Headphones",
-    },
-  ]);
+  const [cart, setCart] = useState([]);
 
   const [search, setSearch] = useState("");
   const router = useRouter();
 
+  useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCart(cart);
+  }, []);
+
   // Increase quantity
   const handleIncrease = (id: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+    setCart((prev: any) =>
+      prev.map((item: any) =>
+        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
       )
     );
   };
 
   // Decrease quantity
   const handleDecrease = (id: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id && item.quantity > 1
+    setCart((prev: any) =>
+      prev.map((item: any) =>
+        item._id === id && item.quantity > 1
           ? { ...item, quantity: item.quantity - 1 }
           : item
       )
     );
   };
 
-  // Remove item
-  const handleRemove = (id: number) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const handleRemove = (id: any) => {
+    setCart((prev: any) => {
+      const updatedCart = prev.filter((item: any) => item._id !== id);
+
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      return updatedCart;
+    });
   };
 
   // Cart total
   const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum: number, item: any) => sum + item.price * item.quantity,
     0
   );
 
+  // // Checkout handler
+  // const handleCheckout = () => {
+  //   router.push("/checkout");
+  // };
+
   // Checkout handler
   const handleCheckout = () => {
-    router.push('/checkout')
+    localStorage.setItem("checkoutProducts", JSON.stringify(cart));
+
+    localStorage.setItem("checkoutTotal", JSON.stringify(totalAmount));
+
+    router.push("/checkout");
   };
 
   return (
@@ -76,14 +80,14 @@ export default function CartPage() {
               Your cart is empty.
             </p>
           ) : (
-            cart.map((item) => (
+            cart.map((item: any) => (
               <div
-                key={item.id}
+                key={item._id}
                 className="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b pb-5"
               >
                 {/* Product Image */}
                 <img
-                  src={item.image}
+                  src={item.image.url}
                   className="w-28 h-28 rounded-xl object-cover shadow-md"
                 />
 
@@ -97,7 +101,7 @@ export default function CartPage() {
                   {/* Quantity Controls */}
                   <div className="flex items-center gap-4 mt-3">
                     <button
-                      onClick={() => handleDecrease(item.id)}
+                      onClick={() => handleDecrease(item._id)}
                       className="p-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
                     >
                       <Minus size={18} />
@@ -108,7 +112,7 @@ export default function CartPage() {
                     </span>
 
                     <button
-                      onClick={() => handleIncrease(item.id)}
+                      onClick={() => handleIncrease(item._id)}
                       className="p-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
                     >
                       <Plus size={18} />
@@ -123,7 +127,7 @@ export default function CartPage() {
                   </p>
 
                   <button
-                    onClick={() => handleRemove(item.id)}
+                    onClick={() => handleRemove(item._id)}
                     className="text-red-500 hover:text-red-700 transition"
                   >
                     <Trash2 size={24} />

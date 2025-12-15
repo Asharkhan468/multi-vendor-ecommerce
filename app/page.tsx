@@ -5,6 +5,7 @@ import { ShoppingCart, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/UserHeader";
 import { getAllProduct } from "@/libs/api";
+import { toast } from "react-toastify";
 
 type Product = {
   id: string;
@@ -24,7 +25,6 @@ export default function HomePage() {
   const [sort, setSort] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   const router = useRouter();
 
@@ -79,6 +79,29 @@ export default function HomePage() {
     );
   }
 
+  //handle add to cart button
+
+  const handleAddCart = (item: any) => {
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    const alreadyExists = existingCart.find(
+      (cartItem: any) => cartItem._id === item._id
+    );
+
+    if (alreadyExists) {
+      toast.error("Item already in cart");
+      return;
+    }
+
+    existingCart.push({
+      ...item,
+      quantity: 1,
+    });
+
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ================= Header ================= */}
@@ -106,7 +129,6 @@ export default function HomePage() {
             </span>
           </div>
 
-        
           {/* Price */}
           <div className="relative">
             <select
@@ -184,54 +206,54 @@ export default function HomePage() {
         </div>
       </main> */}
 
-
-
       <main className="max-w-7xl mx-auto px-6 py-10">
-  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-    Featured Products
-  </h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+          Featured Products
+        </h2>
 
-  {loading ? (
-    <div className="w-full flex justify-center py-20">
-      <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-    </div>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-      {filteredProducts.map((product: any) => (
-        <div
-          key={product._id}
-          onClick={() => router.push(`/products/${product._id}`)}
-          className="bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 cursor-pointer"
-        >
-          <img
-            src={product.image.url}
-            alt={product.title}
-            className="w-full h-56 object-cover"
-          />
-
-          <div className="p-5">
-            <h3 className="text-lg font-semibold text-gray-800">
-              {product.title}
-            </h3>
-            <p className="text-gray-500">{product.category}</p>
-
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-xl font-bold text-gray-700">
-                ${product.price}
-              </span>
-
-              <button className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
-                <ShoppingCart size={18} />
-                Add to Cart
-              </button>
-            </div>
+        {loading ? (
+          <div className="w-full flex justify-center py-20">
+            <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
-        </div>
-      ))}
-    </div>
-  )}
-</main>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {filteredProducts.map((product: any) => (
+              <div
+                key={product._id}
+                className="bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 cursor-pointer"
+              >
+                <img
+                  src={product.image.url}
+                  alt={product.title}
+                  onClick={() => router.push(`/products/${product._id}`)}
+                  className="w-full h-56 object-cover"
+                />
 
+                <div className="p-5">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {product.title}
+                  </h3>
+                  <p className="text-gray-500">{product.category}</p>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xl font-bold text-gray-700">
+                      ${product.price}
+                    </span>
+
+                    <button
+                      onClick={() => handleAddCart(product)}
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition"
+                    >
+                      <ShoppingCart size={18} />
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

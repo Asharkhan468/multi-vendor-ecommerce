@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; // App Router
 import Header from "@/components/UserHeader";
+import { getAllProduct } from "@/libs/api";
+import { toast } from "react-toastify";
 
 type Product = {
   id: string;
@@ -14,44 +16,44 @@ type Product = {
   description: string;
 };
 
-const demoProducts: Product[] = [
-  {
-    id: "1",
-    title: "Smartphone X",
-    price: 799,
-    image: "https://via.placeholder.com/600x400?text=Smartphone+X",
-    category: "Electronics",
-    description:
-      "Smartphone X is the latest mobile device with advanced features and premium build quality.",
-  },
-  {
-    id: "2",
-    title: "Wireless Headphones",
-    price: 199,
-    image: "https://via.placeholder.com/600x400?text=Headphones",
-    category: "Electronics",
-    description:
-      "Enjoy crystal-clear sound and wireless convenience with these premium headphones.",
-  },
-  {
-    id: "3",
-    title: "Gaming Laptop",
-    price: 1299,
-    image: "https://via.placeholder.com/600x400?text=Gaming+Laptop",
-    category: "Computers",
-    description:
-      "High-performance gaming laptop with latest GPU and powerful CPU for smooth gameplay.",
-  },
-  {
-    id: "4",
-    title: "Smart Watch",
-    price: 299,
-    image: "https://via.placeholder.com/600x400?text=Smart+Watch",
-    category: "Wearables",
-    description:
-      "Smart Watch keeps you connected and tracks your fitness goals effortlessly.",
-  },
-];
+// const demoProducts: Product[] = [
+//   {
+//     id: "1",
+//     title: "Smartphone X",
+//     price: 799,
+//     image: "https://via.placeholder.com/600x400?text=Smartphone+X",
+//     category: "Electronics",
+//     description:
+//       "Smartphone X is the latest mobile device with advanced features and premium build quality.",
+//   },
+//   {
+//     id: "2",
+//     title: "Wireless Headphones",
+//     price: 199,
+//     image: "https://via.placeholder.com/600x400?text=Headphones",
+//     category: "Electronics",
+//     description:
+//       "Enjoy crystal-clear sound and wireless convenience with these premium headphones.",
+//   },
+//   {
+//     id: "3",
+//     title: "Gaming Laptop",
+//     price: 1299,
+//     image: "https://via.placeholder.com/600x400?text=Gaming+Laptop",
+//     category: "Computers",
+//     description:
+//       "High-performance gaming laptop with latest GPU and powerful CPU for smooth gameplay.",
+//   },
+//   {
+//     id: "4",
+//     title: "Smart Watch",
+//     price: 299,
+//     image: "https://via.placeholder.com/600x400?text=Smart+Watch",
+//     category: "Wearables",
+//     description:
+//       "Smart Watch keeps you connected and tracks your fitness goals effortlessly.",
+//   },
+// ];
 
 interface Props {
   params: { id: string }; // App Router params
@@ -61,10 +63,25 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { id } = useParams();
   const [search, setSearch] = useState("");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  console.log(id, "params");
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getAllProduct();
 
-  const product = demoProducts.find((p) => p.id === id);
+      if (res.success) {
+        setProducts(res.data.products);
+        setLoading(false);
+      } else {
+        console.log(res.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const product: any = products.find((p: any) => p._id === id);
 
   if (!product) {
     return (
@@ -74,6 +91,28 @@ export default function ProductDetailPage() {
     );
   }
 
+  //handle add to cart
+
+  const handleAddCart = (item: any) => {
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    const alreadyExists = existingCart.find(
+      (cartItem: any) => cartItem._id === item._id
+    );
+
+    if (alreadyExists) {
+      toast.error("Item already in cart");
+      return;
+    }
+
+    existingCart.push({
+      ...item,
+      quantity: 1,
+    });
+
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -82,7 +121,7 @@ export default function ProductDetailPage() {
       {/* Product Detail */}
       <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
         <img
-          src={product.image}
+          src={product.image.url}
           alt={product.title}
           className="w-full h-96 object-cover rounded-3xl shadow-xl"
         />
@@ -98,7 +137,7 @@ export default function ProductDetailPage() {
 
           <p className="text-gray-700 mb-6">{product.description}</p>
 
-          <button className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
+          <button onClick={()=>{handleAddCart(product)}} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
             <ShoppingCart size={20} />
             Add to Cart
           </button>
