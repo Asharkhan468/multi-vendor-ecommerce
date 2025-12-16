@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Header from "@/components/UserHeader";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { createOrder } from "@/libs/api";
 
 export default function CheckoutPage() {
   const [search, setSearch] = useState("");
@@ -27,7 +28,7 @@ export default function CheckoutPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     //  Get cart from localStorage
@@ -54,20 +55,23 @@ export default function CheckoutPage() {
       orderDate: new Date().toISOString(),
     };
 
-    console.log("Order Object:", orderObject);
-
     localStorage.setItem("latestOrder", JSON.stringify(orderObject));
+    try {
+      const res = await createOrder(orderObject);
 
-    toast.success(
-      "Order Placed Successfully!\nThank you for shopping with us."
-    );
+      toast.success(
+        "Order Placed Successfully!\nThank you for shopping with us."
+      );
 
-    localStorage.removeItem("cart");
-    localStorage.removeItem("checkoutProducts");
-    localStorage.removeItem("checkoutTotal");
-    localStorage.removeItem("latestOrder");
+      localStorage.removeItem("cart");
+      localStorage.removeItem("checkoutProducts");
+      localStorage.removeItem("checkoutTotal");
+      localStorage.removeItem("latestOrder");
 
-    router.push("/");
+      router.push("/");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -92,7 +96,7 @@ export default function CheckoutPage() {
                 value={form.fullName}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3 text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="email"
@@ -101,7 +105,7 @@ export default function CheckoutPage() {
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3  text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="tel"
@@ -110,7 +114,7 @@ export default function CheckoutPage() {
                 value={form.phone}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3  text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="text"
@@ -119,7 +123,7 @@ export default function CheckoutPage() {
                 value={form.address}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3  text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="text"
@@ -128,7 +132,7 @@ export default function CheckoutPage() {
                 value={form.city}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3 rounded-xl border  text-gray-800 placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="text"
@@ -137,7 +141,7 @@ export default function CheckoutPage() {
                 value={form.state}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3  text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <input
                 type="text"
@@ -146,7 +150,7 @@ export default function CheckoutPage() {
                 value={form.zip}
                 onChange={handleChange}
                 required
-                className="p-3 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="p-3  text-gray-800 rounded-xl border placeholder:text-gray-700 border-gray-300 w-full focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
 

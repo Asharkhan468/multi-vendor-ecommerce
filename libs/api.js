@@ -81,7 +81,7 @@ export const createProduct = async (
 
     const res = await fetch(`${baseUrl}api/products`, {
       method: "POST",
-      body: formData, 
+      body: formData,
     });
 
     const data = await res.json();
@@ -126,5 +126,28 @@ export const getAllCategories = async () => {
   } catch (error) {
     console.log("Fetch error:", error);
     return { success: false, message: "Something went wrong" };
+  }
+};
+
+export const createOrder = async (orderData) => {
+  try {
+    const response = await fetch(`${baseUrl}api/order/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Order create failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Order Error:", error.message);
+    throw error;
   }
 };

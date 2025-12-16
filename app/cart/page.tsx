@@ -52,9 +52,6 @@ export default function CartPage() {
   );
 
   // // Checkout handler
-  // const handleCheckout = () => {
-  //   router.push("/checkout");
-  // };
 
   // Checkout handler
   const handleCheckout = () => {
