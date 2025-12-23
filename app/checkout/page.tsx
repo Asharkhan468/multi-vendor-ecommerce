@@ -40,6 +40,7 @@ export default function CheckoutPage() {
     const products = cartProducts.map((item: any) => ({
       productId: item._id,
       quantity: item.quantity,
+      title:item.title,
     }));
 
     //  Calculate total (subtotal + shipping)
@@ -54,6 +55,9 @@ export default function CheckoutPage() {
       paymentMethod: form.payment,
       orderDate: new Date().toISOString(),
     };
+
+
+    console.log(orderObject)
 
     localStorage.setItem("latestOrder", JSON.stringify(orderObject));
     try {

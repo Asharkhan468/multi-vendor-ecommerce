@@ -14,12 +14,15 @@ import {
   
   Layers
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logoutUser } from "@/libs/api";
+import { toast } from "react-toastify";
 
 export default function Sidebar({ activeTab, setActiveTab }: any) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
   const pannelName= path.includes("/admin")?"Admin Pannel":"Vendor Pannel";
+  const router = useRouter();
 
 
  
@@ -41,8 +44,19 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
 
   const tabs = path.includes("/admin")?adminTabs:vendorTabs;
 
-  const handleLogout = () => {
-    console.log("User logged out");
+  const handleLogout = async() => {
+    const res = await logoutUser();
+
+    
+    if(res.success){
+      router.push("/auth/login")
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      toast.success("Logout sucessfull")
+    }else{
+      console.log(res)
+      toast.error("Something went wrong")
+    }
   };
 
   return (

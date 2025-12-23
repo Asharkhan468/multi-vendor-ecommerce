@@ -17,7 +17,7 @@ export const loginUser = async (email, password) => {
 
     if (data?.user) {
       localStorage.setItem("user", JSON.stringify(data.user));
-      sessionStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token);
     }
 
     return { success: true, data };
@@ -79,9 +79,14 @@ export const createProduct = async (
     formData.append("image", selectedFile);
     formData.append("stock", stock);
 
+    const token = localStorage.getItem("token");
+
     const res = await fetch(`${baseUrl}api/products`, {
       method: "POST",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const data = await res.json();
@@ -91,9 +96,15 @@ export const createProduct = async (
   }
 };
 export const getAllProduct = async () => {
+  const token = localStorage.getItem("token");
+
   try {
     const res = await fetch(`${baseUrl}api/products`, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!res.ok) {
@@ -130,16 +141,20 @@ export const getAllCategories = async () => {
 };
 
 export const createOrder = async (orderData) => {
+  const token = localStorage.getItem("token");
+
   try {
     const response = await fetch(`${baseUrl}api/order/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(orderData),
     });
 
     const data = await response.json();
+    console.log(data.error);
 
     if (!response.ok) {
       throw new Error(data.message || "Order create failed");
@@ -147,7 +162,73 @@ export const createOrder = async (orderData) => {
 
     return data;
   } catch (error) {
-    console.error("Order Error:", error.message);
+    console.error("Order Error:", error.error);
     throw error;
+  }
+};
+
+export const getVendorOrders = async () => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}api/order/seller`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to fetch categories" };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+export const logoutUser = async () => {
+  try {
+    const res = await fetch(`${baseUrl}api/auth/logout`, {
+      method: "POST",
+    });
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to Logout" };
+    }
+    return { success: true };
+  } catch (error) {
+    console.log("error:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+
+
+export const deleteProductWithId = async (id) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}api/products/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to delete the product");
+    }
+
+    const data = await res.json();
+    console.log("Product deleted successfully:", data);
+    return data;
+  } catch (error) {
+    console.log("Error:", error);
   }
 };
