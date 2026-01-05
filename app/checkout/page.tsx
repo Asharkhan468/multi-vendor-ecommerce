@@ -75,6 +75,9 @@ export default function CheckoutPage() {
       router.push("/");
     } catch (error: any) {
       toast.error(error.message);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/auth/login");
     }
   };
 

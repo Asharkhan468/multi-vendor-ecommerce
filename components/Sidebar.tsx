@@ -11,8 +11,7 @@ import {
   X,
   Users,
   UserCog,
-  
-  Layers
+  Layers,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutUser } from "@/libs/api";
@@ -21,11 +20,9 @@ import { toast } from "react-toastify";
 export default function Sidebar({ activeTab, setActiveTab }: any) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
-  const pannelName= path.includes("/admin")?"Admin Pannel":"Vendor Pannel";
+  const pannelName = path.includes("/admin") ? "Admin Pannel" : "Vendor Pannel";
   const router = useRouter();
 
-
- 
   const vendorTabs = [
     { name: "Home", icon: Home },
     { name: "Orders", icon: ShoppingCart },
@@ -33,29 +30,28 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
     { name: "Inventory", icon: Box },
   ];
 
- const adminTabs = [
-  { name: "Home", icon: Home },               
-  { name: "Products", icon: ShoppingCart },  
-  { name: "Vendors", icon: UserCog },        
-  { name: "Users", icon: Users },           
-  { name: "Orders", icon: Archive },         
-  { name: "Categories", icon: Layers },     
-];
+  const adminTabs = [
+    { name: "Home", icon: Home },
+    { name: "Products", icon: ShoppingCart },
+    { name: "Vendors", icon: UserCog },
+    { name: "Users", icon: Users },
+    { name: "Orders", icon: Archive },
+    { name: "Categories", icon: Layers },
+  ];
 
-  const tabs = path.includes("/admin")?adminTabs:vendorTabs;
+  const tabs = path.includes("/admin") ? adminTabs : vendorTabs;
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     const res = await logoutUser();
 
-    
-    if(res.success){
-      router.push("/auth/login")
+    if (res.success) {
+      router.push("/auth/login");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      toast.success("Logout sucessfull")
-    }else{
-      console.log(res)
-      toast.error("Something went wrong")
+      toast.success("Logout sucessfull");
+    } else {
+      console.log(res);
+      toast.error("Something went wrong");
     }
   };
 
@@ -90,11 +86,6 @@ export default function Sidebar({ activeTab, setActiveTab }: any) {
           <h1 className="hidden md:block text-2xl font-bold p-6 border-b border-indigo-500">
             {pannelName}
           </h1>
-
-          {/* Close Button for Mobile */}
-          {/* <div className="md:hidden flex justify-end p-4">
-            <X className="w-6 h-6" onClick={() => setOpen(false)} />
-          </div> */}
 
           {/* Mobile Sidebar Header */}
           <div className="md:hidden flex justify-between items-center px-4 py-3 border-b border-indigo-500">

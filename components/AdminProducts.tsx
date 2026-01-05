@@ -38,15 +38,15 @@ export default function AdminProductsTable({
 
           <tbody>
             {products?.length > 0 ? (
-              products.map((product) => (
+              products.map((product:any) => (
                 <tr
-                  key={product.id}
+                  key={product._id}
                   className="border-b hover:bg-gray-50 transition"
                 >
                   <td className="p-3">
                     {product.image ? (
                       <img
-                        src={product.image}
+                        src={product.image.url}
                         alt={product.title}
                         className="w-12 h-12 rounded-md object-cover border"
                       />
@@ -107,9 +107,9 @@ export default function AdminProductsTable({
       {/* MOBILE CARDS */}
       <div className="md:hidden space-y-4">
         {products?.length > 0 ? (
-          products.map((product) => (
+          products.map((product:any) => (
             <div
-              key={product.id}
+              key={product._id}
               className="border rounded-xl p-4 shadow-sm bg-gray-50"
             >
               <div className="flex gap-4 items-center">

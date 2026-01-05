@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Upload, X } from "lucide-react";
-import { createProduct, getAllCategories } from "@/libs/api";
+import {
+  createProduct,
+  getAllCategories,
+  updateProductWithId,
+} from "@/libs/api";
 import { toast } from "react-toastify";
 
-export default function AddProduct({ onClose }: any) {
+export default function AddProduct({ onClose, editProduct }: any) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -15,16 +19,25 @@ export default function AddProduct({ onClose }: any) {
   const [loading, setLoading] = useState(false);
   const [categoryList, setCategoryList] = useState([]);
 
-  const handleImageUpload = (e: any) => {
-    const files = Array.from(e.target.files);
+  useEffect(() => {
+    if (editProduct) {
+      setTitle(editProduct.title);
+      setDesc(editProduct.description);
+      setPrice(editProduct.price);
+      setCategory(editProduct.category);
+      setStock(editProduct.stock);
+      setCategory(editProduct.category);
 
-    const newImages = files.map((file: any) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    setImages([...images, ...newImages]);
-  };
+      if (editProduct.image?.url) {
+        setImages([
+          {
+            file: null, 
+            preview: editProduct.image.url,
+          },
+        ]);
+      }
+    }
+  }, [editProduct]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,32 +61,57 @@ export default function AddProduct({ onClose }: any) {
         return;
       }
 
-      if (!images || images.length === 0 || !images[0].file) {
+      if (!images || images.length === 0) {
         toast.error("Please upload an image!");
         return;
       }
+
+      if (!editProduct && !images[0]?.file) {
+        toast.error("Please upload an image!");
+        return;
+      }
+
       setLoading(true);
-      // API Call
-      const res = await createProduct(
-        title,
-        desc,
-        price,
-        category,
-        stock,
-        images[0].file
-      );
-      console.log(res);
-      if (res?.success) {
-        setLoading(false);
-        toast.success("Product added successfully");
+
+      let res;
+
+      if (editProduct) {
+        // UPDATE PRODUCT
+        res = await updateProductWithId(
+          editProduct._id,
+          title,
+          desc,
+          price,
+          category,
+          stock,
+          images[0].file
+        );
       } else {
-        setLoading(false);
+        // CREATE PRODUCT
+        res = await createProduct(
+          title,
+          desc,
+          price,
+          category,
+          stock,
+          images[0].file
+        );
+      }
+
+      if (res?.success) {
+        toast.success(
+          editProduct
+            ? "Product updated successfully"
+            : "Product added successfully"
+        );
+        onClose();
+      } else {
         toast.error(res?.message || "Something went wrong");
       }
-      onClose();
     } catch (error) {
-      setLoading(false);
       toast.error("Unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,7 +127,7 @@ export default function AddProduct({ onClose }: any) {
         </button>
 
         <h2 className="text-2xl font-bold mb-4 text-gray-900">
-          Add New Product
+        {editProduct?"Edit Product":"Add New Product"}
         </h2>
 
         {/* Form */}
@@ -229,7 +267,7 @@ export default function AddProduct({ onClose }: any) {
             {loading ? (
               <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              "Add Product"
+              `${editProduct?"Update Product":"Add Product"}`
             )}
           </button>
         </div>

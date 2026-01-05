@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ShoppingCart, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/UserHeader";
-import { getAllProduct } from "@/libs/api";
+import { getAllCategories, getAllProduct } from "@/libs/api";
 import { toast } from "react-toastify";
 
 type Product = {
@@ -25,8 +25,22 @@ export default function HomePage() {
   const [sort, setSort] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
   const router = useRouter();
+
+  const fetchCategories = async () => {
+    try {
+      const res = await getAllCategories();
+      if (res.success) {
+        setCategories(res.data.data);
+      } else {
+        toast.error(res.message || "Failed to fetch categories");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +55,7 @@ export default function HomePage() {
     };
 
     fetchData();
+    fetchCategories();
   }, []);
 
   // ======== Filtering ========
@@ -82,6 +97,21 @@ export default function HomePage() {
   //handle add to cart button
 
   const handleAddCart = (item: any) => {
+    // Check for token
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null"); // Assuming you store user object
+
+    if (!token || !user) {
+      toast.error("Please login first to add items to cart!");
+      router.push("/auth/login");
+      return;
+    }
+
+    if (user.role !== "customer") {
+      toast.error("Only customers can add items to cart!");
+      return;
+    }
+
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
     const alreadyExists = existingCart.find(
@@ -99,9 +129,8 @@ export default function HomePage() {
     });
 
     localStorage.setItem("cart", JSON.stringify(existingCart));
-
+    toast.success("Item added to cart");
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ================= Header ================= */}
@@ -120,10 +149,13 @@ export default function HomePage() {
               onChange={(e) => setCategory(e.target.value)}
             >
               <option value="">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Computers">Computers</option>
-              <option value="Wearables">Wearables</option>
+              {categories.map((cat: any) => (
+                <option key={cat._id || cat} value={cat.name || cat}>
+                  {cat.name || cat}
+                </option>
+              ))}
             </select>
+
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
               ⏷
             </span>
@@ -166,45 +198,6 @@ export default function HomePage() {
       </div>
 
       {/* ================= Products Section ================= */}
-      {/* <main className="max-w-7xl mx-auto px-6 py-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Featured Products
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {filteredProducts.map((product: any) => (
-            <div
-              key={product._id}
-              onClick={() => router.push(`/products/${product._id}`)}
-              className="bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 cursor-pointer"
-            >
-              <img
-                src={product.image.url}
-                alt={product.title}
-                className="w-full h-56 object-cover"
-              />
-
-              <div className="p-5">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {product.title}
-                </h3>
-                <p className="text-gray-500">{product.category}</p>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xl font-bold text-gray-700">
-                    ${product.price}
-                  </span>
-
-                  <button className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
-                    <ShoppingCart size={18} />
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </main> */}
 
       <main className="max-w-7xl mx-auto px-6 py-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">

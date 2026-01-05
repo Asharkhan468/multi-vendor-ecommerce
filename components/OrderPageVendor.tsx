@@ -1,7 +1,9 @@
 "use client";
 
-import { getVendorOrders } from "@/libs/api";
+import { getVendorOrders, updateOrderStatus } from "@/libs/api";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 const statusStyles: any = {
   Preparing: "bg-yellow-100 text-yellow-700",
@@ -18,20 +20,43 @@ export default function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true); // loader state
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchOrders = async () => {
-      setLoading(true); // start loader
+      setLoading(true);
       const res = await getVendorOrders();
       if (res.success) {
         setOrders(res.data.orders);
+      } else if (res.blocked) {
+        localStorage.removeItem("token");
+        toast.error(res.message);
+        router.push("/auth/login");
+        setLoading(false);
       } else {
         console.log(res.message);
+        setLoading(false);
       }
-      setLoading(false); // stop loader
+      setLoading(false);
     };
 
     fetchOrders();
   }, []);
+
+  const handleStatusUpdate = async (newStatus: any, orderId: any) => {
+    const res = await updateOrderStatus(newStatus, orderId);
+
+    if (res.success) {
+      toast.success("Order Status has been updated!");
+      setOrders((prev: any) =>
+        prev.map((order: any) =>
+          order._id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -97,8 +122,7 @@ export default function OrdersDashboard() {
                 <td className="px-4 py-3 text-gray-600">
                   {o.products[0].title}
                 </td>
-                <td className="px-4 py-3">{o.products[0].quantity}</td>{" "}
-                {/* Quantity */}
+                <td className="px-4 py-3">{o.products[0].quantity}</td>
                 <td className="px-4 py-3 font-semibold">${o.totalAmount}</td>
                 <td className="px-4 py-3">
                   <span
@@ -138,7 +162,7 @@ export default function OrdersDashboard() {
                         {["Preparing", "Shipped", "Delivered"].map((status) => (
                           <button
                             key={status}
-                            onClick={() => updateStatus(o.orderId, status)}
+                            onClick={() => handleStatusUpdate(status, o._id)}
                             className="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50"
                           >
                             {status}
@@ -178,7 +202,7 @@ export default function OrdersDashboard() {
                     {["Preparing", "Shipped", "Delivered"].map((status) => (
                       <button
                         key={status}
-                        onClick={() => updateStatus(o.orderId, status)}
+                        onClick={() => updateStatus(o.id, status)}
                         className="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50"
                       >
                         {status}

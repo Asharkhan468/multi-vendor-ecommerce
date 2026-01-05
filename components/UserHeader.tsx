@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ShoppingCart, Search, User, PackageSearch } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ShoppingCart, Search, PackageSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type HeaderProps = {
@@ -11,14 +11,34 @@ type HeaderProps = {
 
 export default function Header({ search, setSearch }: HeaderProps) {
   const router = useRouter();
-  const [cart , setCart]=useState([]);
-
+  const [cart, setCart] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const[profile , setProfile]=useState<any>("")
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      setCart(cart);
-    }, []);
-  
+    // Check token for login
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") as any);
+    const image = user.photo;
+    setIsLoggedIn(!!token);
+    setProfile(image)
+
+    // Get cart from localStorage
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCart(cart);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   return (
     <header className="bg-indigo-600 text-white shadow-md py-4">
       <div className="max-w-7xl mx-auto px-6">
@@ -32,7 +52,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
             Premium Store
           </h1>
 
-          {/* Search + Cart + Profile + Order Status */}
+          {/* Search + Cart + Profile/Login + Order Status */}
           <div className="flex items-center gap-6">
             {/* Search */}
             <div className="relative w-64">
@@ -49,22 +69,50 @@ export default function Header({ search, setSearch }: HeaderProps) {
               />
             </div>
 
-            {/* Order Status */}
-            <div
-              className="cursor-pointer flex items-center gap-2 hover:text-gray-200 transition"
-              onClick={() => router.push("/orderStatus")}
-            >
-              <PackageSearch size={24} />
-              <span className="text-sm font-medium">Order Status</span>
-            </div>
+            {/* Profile / Login */}
+            {isLoggedIn ? (
+              <div className="relative" ref={dropdownRef}>
+                <img
+                  src={profile}
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="w-10 h-10 rounded-full border-2 border-white cursor-pointer hover:scale-110 transition object-cover"
+                  alt="Profile"
+                />
 
-            {/* Profile Image (or default icon) */}
-            <img
-              src="/profile.png"
-              onClick={() => router.push("/profile")}
-              className="w-10 h-10 rounded-full border-2 border-white cursor-pointer hover:scale-110 transition object-cover"
-              alt="Profile"
-            />
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden animate-fadeIn">
+                    <button
+                      onClick={() => router.push("/profile")}
+                      className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-2"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => router.push("/orderStatus")}
+                      className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-2"
+                    >
+                      Order Status
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        router.push("/login");
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-red-100 text-red-600 flex items-center gap-2"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push("/auth/login")}
+                className="bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+              >
+                Login
+              </button>
+            )}
 
             {/* Cart */}
             <div
@@ -90,12 +138,21 @@ export default function Header({ search, setSearch }: HeaderProps) {
           </h1>
 
           <div className="flex items-center gap-4">
-            {/* Profile Image */}
-            <img
-              src="/profile.png"
-              onClick={() => router.push("/profile")}
-              className="w-9 h-9 rounded-full border border-white cursor-pointer"
-            />
+            {/* Profile / Login */}
+            {isLoggedIn ? (
+              <img
+                src="/profile.png"
+                onClick={() => router.push("/profile")}
+                className="w-9 h-9 rounded-full border border-white cursor-pointer"
+              />
+            ) : (
+              <button
+                onClick={() => router.push("/login")}
+                className="bg-white text-indigo-600 px-3 py-1 rounded-lg font-semibold hover:bg-gray-100 transition"
+              >
+                Login
+              </button>
+            )}
 
             {/* Order Status Icon */}
             <PackageSearch
@@ -111,7 +168,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
             >
               <ShoppingCart size={26} />
               <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-2">
-              {cart.length}
+                {cart.length}
               </span>
             </div>
           </div>

@@ -1,31 +1,94 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Folder, Trash2, Edit } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Folder, Trash2, Edit, Check, X } from "lucide-react";
+import {
+  createCategory,
+  deleteCategoryWithId,
+  getAllCategories,
+  updateCategoryWithId,
+} from "@/libs/api";
+import { toast } from "react-toastify";
 
 export default function AdminCategoriesComponent() {
-  // demo categories
-  const [categories, setCategories] = useState([
-    { id: "cat-1", name: "Electronics", products: 120 },
-    { id: "cat-2", name: "Fashion", products: 80 },
-    { id: "cat-3", name: "Groceries", products: 200 },
-  ]);
-
+  const [categories, setCategories] = useState<any[]>([]);
   const [newCategory, setNewCategory] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
-  const createCategory = () => {
-    if (!newCategory.trim()) return;
-    const newCat = {
-      id: `cat-${Date.now()}`,
-      name: newCategory,
-      products: 0,
-    };
-    setCategories([newCat, ...categories]);
-    setNewCategory("");
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllCategories();
+      if (res.success) {
+        setCategories(res.data.data);
+      } else {
+        toast.error(res.message || "Failed to fetch categories");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteCategory = (id: any) => {
-    setCategories(categories.filter((cat) => cat.id !== id));
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleCreateCategory = async () => {
+    if (!newCategory.trim()) return;
+
+    try {
+      const res = await createCategory(newCategory);
+      if (res.success) {
+        fetchCategories();
+        toast.success("Category created successfully");
+        setNewCategory("");
+      } else {
+        toast.error(res.message || "Failed to create category");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      const res = await deleteCategoryWithId(id);
+      if (res.success) {
+        setCategories(categories.filter((cat) => cat._id !== id));
+        toast.success("Category deleted successfully");
+      } else {
+        toast.error(res.message || "Failed to delete category");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleEditCategory = (id: string, name: string) => {
+    setEditingId(id);
+    setEditingName(name);
+  };
+
+  const handleUpdateCategory = async (id: string) => {
+    if (!editingName.trim()) return;
+
+    try {
+      const res = await updateCategoryWithId(id, editingName);
+      if (res.success) {
+        fetchCategories();
+        toast.success("Category updated successfully");
+        setEditingId(null);
+        setEditingName("");
+      } else {
+        toast.error(res.message || "Failed to update category");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -47,7 +110,6 @@ export default function AdminCategoriesComponent() {
         <h3 className="text-lg font-medium mb-3 text-black">
           Create New Category
         </h3>
-
         <div className="flex gap-3">
           <input
             type="text"
@@ -56,9 +118,8 @@ export default function AdminCategoriesComponent() {
             placeholder="Enter category name..."
             className="flex-1 border border-gray-300 rounded-xl p-3 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
-
           <button
-            onClick={createCategory}
+            onClick={handleCreateCategory}
             className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 flex items-center gap-2"
           >
             <Plus size={18} /> Add
@@ -68,36 +129,74 @@ export default function AdminCategoriesComponent() {
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="p-4 bg-white rounded-2xl shadow-sm border flex flex-col justify-between"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <Folder className="text-purple-600" size={22} />
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-black">{cat.name}</h4>
-                <p className="text-xs text-zinc-700">{cat.products} Products</p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-4">
-              <button className="p-2 text-gray-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg">
-                <Edit size={18} />
-              </button>
-              <button
-                onClick={() => deleteCategory(cat.id)}
-                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
+        {loading && (
+          <div className="flex justify-center items-center py-16 col-span-full">
+            <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ))}
+        )}
 
-        {categories.length === 0 && (
+        {!loading &&
+          categories.map((cat) => (
+            <div
+              key={cat._id}
+              className="p-4 bg-white rounded-2xl shadow-sm border flex flex-col justify-between"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <Folder className="text-purple-600" size={22} />
+                </div>
+
+                {editingId === cat._id ? (
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="border text-black border-gray-600 rounded-xl p-2 flex-1"
+                  />
+                ) : (
+                  <h4 className="text-lg font-semibold text-black">
+                    {cat.name}
+                  </h4>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                {editingId === cat._id ? (
+                  <>
+                    <button
+                      onClick={() => handleUpdateCategory(cat._id)}
+                      className="p-2 bg-green-100 hover:bg-green-200 text-green-600 rounded-lg"
+                    >
+                      <Check size={18} />
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
+                    >
+                      <X size={18} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleEditCategory(cat._id, cat.name)}
+                      className="p-2 text-gray-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(cat._id)}
+                      className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+
+        {!loading && categories.length === 0 && (
           <div className="text-center text-zinc-700 col-span-full py-10">
             No categories found.
           </div>

@@ -1,18 +1,20 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Package, CheckCircle, Clock } from "lucide-react";
 
 export default function AdminOrdersComponent({ orders }: { orders?: any[] }) {
-  const demoOrders = [
-    { id: "ORD-1001", date: "2025-11-25", status: "completed", total: 120.5 },
-    { id: "ORD-1002", date: "2025-11-25", status: "pending", total: 45.0 },
-    { id: "ORD-1003", date: "2025-11-24", status: "completed", total: 220.0 },
-    { id: "ORD-1004", date: "2025-11-23", status: "processing", total: 89.99 },
-    { id: "ORD-1005", date: "2025-11-22", status: "completed", total: 15.0 },
-    { id: "ORD-1006", date: "2025-11-20", status: "cancelled", total: 0 },
-  ];
+  // const demoOrders = [
+  //   { id: "ORD-1001", date: "2025-11-25", status: "completed", total: 120.5 },
+  //   { id: "ORD-1002", date: "2025-11-25", status: "pending", total: 45.0 },
+  //   { id: "ORD-1003", date: "2025-11-24", status: "completed", total: 220.0 },
+  //   { id: "ORD-1004", date: "2025-11-23", status: "processing", total: 89.99 },
+  //   { id: "ORD-1005", date: "2025-11-22", status: "completed", total: 15.0 },
+  //   { id: "ORD-1006", date: "2025-11-20", status: "cancelled", total: 0 },
+  // ];
+const [demoOrders , setDemoOrders]=useState([]);
+
 
   const data = orders && orders.length ? orders : demoOrders;
 

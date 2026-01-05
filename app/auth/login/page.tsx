@@ -32,6 +32,8 @@ export default function LoginPage() {
       toast.success("Login Sucessfully!");
       if(user.role=="customer"){
         router.push("/");
+      }else if(user.role == "admin"){
+        router.push("/admin")
       }else{
         router.push("/vendor")
       }

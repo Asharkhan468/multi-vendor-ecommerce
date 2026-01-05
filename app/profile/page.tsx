@@ -1,82 +1,94 @@
 "use client";
 
 import React, { useState } from "react";
-import { Camera, Pencil } from "lucide-react";
+import { Camera, Pencil, Check, User, Mail } from "lucide-react";
 
 export default function ProfilePage() {
   const [name, setName] = useState("Ashar Khan");
-  const [email, setEmail] = useState("ashar@example.com");
+  const [email] = useState("ashar@example.com"); // read-only
+  const [role] = useState("Admin"); // read-only
 
   const [editName, setEditName] = useState(false);
-  const [editEmail, setEditEmail] = useState(false);
+  const [editPhoto, setEditPhoto] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50 text-gray-900">
+      {/* Header */}
+      <header className="bg-indigo-600 text-white py-6 px-6 shadow-lg">
+        <h1 className="text-3xl font-bold tracking-wide">Profile</h1>
+      </header>
 
-      {/* Solid White Card */}
-      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-md text-center">
-
-        {/* Profile Image */}
-        <div className="relative w-36 h-36 mx-auto">
-          <img
-            src="/profile.png"
-            className="w-36 h-36 rounded-full object-cover border-4 border-gray-200 shadow-lg"
-            alt="Profile"
-          />
-
-          {/* Edit Image Button */}
-          <button className="absolute bottom-1 right-1 bg-indigo-600 text-white w-10 h-10 flex items-center justify-center rounded-full shadow hover:scale-105 transition">
-            <Camera size={20} />
-          </button>
-        </div>
-
-        {/* Name */}
-        <div className="mt-6">
-          {editName ? (
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-gray-100 text-gray-900 text-center py-2 px-3 rounded-xl outline-none border border-gray-300 w-full"
+      {/* Profile Card Section */}
+      <section className="container mx-auto py-16 px-4">
+        <div
+          className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 
+                        bg-white/70 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/30
+                        transition-transform "
+        >
+          {/* Left Side: Profile Image */}
+          <div className="relative w-64 h-64 flex-shrink-0">
+            <img
+              src="/profile.png"
+              className="w-64 h-64 rounded-full object-cover border-4 border-white shadow-xl transition-transform duration-300 hover:scale-105"
+              alt="Profile"
             />
-          ) : (
-            <h2 className="text-2xl font-bold text-gray-900">{name}</h2>
-          )}
+            <button
+              onClick={() => setEditPhoto(!editPhoto)}
+              className="absolute bottom-4 right-4 bg-gradient-to-tr from-indigo-500 to-purple-500 
+                         text-white w-12 h-12 flex items-center justify-center rounded-full shadow-md 
+                         hover:scale-110 transition-transform duration-300"
+            >
+              <Camera size={24} />
+            </button>
+          </div>
 
-          <button
-            onClick={() => setEditName(!editName)}
-            className="mt-2 text-indigo-600 hover:text-indigo-800 transition"
-          >
-            <Pencil size={18} />
-          </button>
+          {/* Right Side: Profile Details */}
+          <div className="flex-1 flex flex-col gap-6 w-full">
+            {/* Name */}
+            <div className="flex items-center justify-between">
+              {editName ? (
+                <div className="flex items-center gap-2 w-full">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="flex-1 bg-white/70 border border-indigo-300 rounded-xl px-4 py-2 outline-none shadow-inner focus:ring-2 focus:ring-indigo-400 text-lg font-medium transition"
+                  />
+                  <button
+                    onClick={() => setEditName(false)}
+                    className="text-green-500 hover:text-green-700 transition"
+                  >
+                    <Check size={24} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 w-full justify-between">
+                  <div className="flex items-center gap-3">
+                    <User size={28} className="text-indigo-600" />
+                    <h2 className="text-3xl font-bold text-gray-800">{name}</h2>
+                  </div>
+                  <button
+                    onClick={() => setEditName(true)}
+                    className="text-indigo-600 hover:text-indigo-800 transition"
+                  >
+                    <Pencil size={22} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Email (read-only) */}
+            <div className="flex items-center gap-3 text-gray-700 text-lg font-medium">
+              <Mail size={22} className="text-indigo-600" /> {email}
+            </div>
+
+            {/* Role (read-only) */}
+            <div className="flex items-center gap-3 text-gray-700 text-lg font-medium">
+              <User size={22} className="text-indigo-600" /> {role}
+            </div>
+          </div>
         </div>
-
-        {/* Email */}
-        <div className="mt-4">
-          {editEmail ? (
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-gray-100 text-gray-900 text-center py-2 px-3 rounded-xl outline-none border border-gray-300 w-full"
-            />
-          ) : (
-            <p className="text-gray-600">{email}</p>
-          )}
-
-          {/* <button
-            onClick={() => setEditEmail(!editEmail)}
-            className="mt-2 text-indigo-600 hover:text-indigo-800 transition"
-          >
-            <Pencil size={18} />
-          </button> */}
-        </div>
-
-        {/* Save Button */}
-        <button className="w-full mt-8 bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition shadow-md">
-          Save Changes
-        </button>
-      </div>
+      </section>
     </div>
   );
 }

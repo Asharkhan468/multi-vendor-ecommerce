@@ -14,11 +14,15 @@ import {
 } from "recharts";
 import { Package, Truck, ShoppingBag, Clock } from "lucide-react";
 import { OrderCard } from "./OrderCard";
-import { getAllProduct, getVendorOrders } from "@/libs/api";
+import { getVendorOrders } from "@/libs/api";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -27,6 +31,10 @@ export default function OrdersDashboard() {
       if (res.success) {
         setOrders(res.data.orders);
         console.log(res.data.orders);
+      } else if (res.blocked) {
+         localStorage.removeItem("token");
+      toast.error(res.message);
+      router.push("/auth/login")
       } else {
         console.log(res.message);
       }
@@ -38,9 +46,9 @@ export default function OrdersDashboard() {
 
   // status wise counts
   const pendingOrders = orders.filter((o: any) => o.status === "pending");
-  const preparingOrders = orders.filter((o: any) => o.status === "preparing");
-  const shippedOrders = orders.filter((o: any) => o.status === "shipped");
-  const deliveredOrders = orders.filter((o: any) => o.status === "delivered");
+  const preparingOrders = orders.filter((o: any) => o.status === "Preparing");
+  const shippedOrders = orders.filter((o: any) => o.status === "Shipped");
+  const deliveredOrders = orders.filter((o: any) => o.status === "Delivered");
 
   // chart ke liye data
   const statusCount = [
