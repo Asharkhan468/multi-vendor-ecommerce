@@ -210,14 +210,16 @@ export const getVendorOrders = async () => {
       },
     });
 
-    if (res.status == 403) {
+    if (res.status === 403) {
       return {
         success: false,
         blocked: true,
         message: "Your account has been blocked",
       };
-    } else if (!res.ok || res.status != 403) {
-      return { success: false, message: "Failed to fetch categories" };
+    }
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to fetch orders" };
     }
 
     const data = await res.json();
@@ -463,12 +465,38 @@ export const updateCategoryWithId = async (id, editedCategory) => {
   }
 };
 
-export const blockUser = async (userId) => {
+export const blockUser = async (userId, status) => {
   try {
     const token = localStorage.getItem("token");
 
     const res = await fetch(`${baseUrl}api/blockUser/${userId}`, {
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }), // 👈 yahan status send ho raha hai
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Something went wrong");
+      return;
+    }
+
+    return data;
+  } catch (error) {
+    console.log("Error:", error.message);
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${baseUrl}api/users/deleteUser/${userId}`, {
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -482,9 +510,71 @@ export const blockUser = async (userId) => {
       return;
     }
 
-    alert(data.message);
     return data;
   } catch (error) {
     console.log("Error:", error.message);
+  }
+};
+
+export const getAllOrders = async () => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}api/order/allOrders`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 403) {
+      return {
+        success: false,
+        blocked: true,
+        message: "Your account has been blocked",
+      };
+    }
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to fetch orders" };
+    }
+
+    const data = await res.json();
+    return { success: true, data }; // ✅ yahan ab success milega
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+export const getUserOrders = async () => {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${baseUrl}api/order/getCurrentUser`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 403) {
+      return {
+        success: false,
+        blocked: true,
+        message: "Your account has been blocked",
+      };
+    }
+
+    if (!res.ok) {
+      return { success: false, message: "Failed to fetch orders" };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return { success: false, message: "Something went wrong" };
   }
 };

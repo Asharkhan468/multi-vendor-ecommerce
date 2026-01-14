@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ShoppingCart, Search, PackageSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getUserOrders } from "@/libs/api";
 
 type HeaderProps = {
   search: string;
@@ -12,18 +13,36 @@ type HeaderProps = {
 export default function Header({ search, setSearch }: HeaderProps) {
   const router = useRouter();
   const [cart, setCart] = useState([]);
+  const [orders ,setOrders]=useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const[profile , setProfile]=useState<any>("")
+  const [profile, setProfile] = useState<any>("");
+  const [role , setRole]=useState("");
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+      const fetchOrders = async () => {
+        const res = await getUserOrders();
+        if (res.success) {
+          setOrders(res.data.orders);
+        } else {
+          console.log(res.message);
+        }
+      };
+  
+      fetchOrders();
+    }, []);
 
   useEffect(() => {
     // Check token for login
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user") as any);
-    const image = user.photo;
+    const image = user?.photo;
     setIsLoggedIn(!!token);
-    setProfile(image)
+    setRole(user?.role)
+    setProfile(image);
+
+
 
     // Get cart from localStorage
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -39,20 +58,24 @@ export default function Header({ search, setSearch }: HeaderProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    router.push("/auth/login");
+  };
   return (
     <header className="bg-indigo-600 text-white shadow-md py-4">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Desktop Layout */}
         <div className="hidden md:flex justify-between items-center">
-          {/* Logo */}
           <h1
             className="text-3xl font-bold tracking-wide cursor-pointer"
             onClick={() => router.push("/")}
           >
             Premium Store
           </h1>
-
-          {/* Search + Cart + Profile/Login + Order Status */}
           <div className="flex items-center gap-6">
             {/* Search */}
             <div className="relative w-64">
@@ -68,9 +91,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
                 className="w-full bg-white text-gray-800 pl-10 pr-4 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
-
-            {/* Profile / Login */}
-            {isLoggedIn ? (
+            {isLoggedIn && role=="customer"? (
               <div className="relative" ref={dropdownRef}>
                 <img
                   src={profile}
@@ -87,16 +108,15 @@ export default function Header({ search, setSearch }: HeaderProps) {
                     >
                       Profile
                     </button>
-                    <button
+                   {orders.length>0 && <button
                       onClick={() => router.push("/orderStatus")}
                       className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-2"
                     >
                       Order Status
-                    </button>
+                    </button>}
                     <button
                       onClick={() => {
-                        localStorage.removeItem("token");
-                        router.push("/login");
+                        handleLogout();
                       }}
                       className="w-full text-left px-4 py-3 hover:bg-red-100 text-red-600 flex items-center gap-2"
                     >

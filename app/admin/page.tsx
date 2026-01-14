@@ -26,11 +26,13 @@ export default function AdminDashboard() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [productsList, setProductsList] = useState([]);
   const [vendorsData, setVendorsData] = useState([]);
+  const [usersList, setUsersList] = useState([]);
 
   const fetchAllUsers = async () => {
     const res = await getAllUsers();
     if (res.success) {
       setTotalUsers(res.data.totalUsers);
+      setUsersList(res.data.users);
     } else {
       console.log(res.message);
     }
@@ -107,43 +109,6 @@ export default function AdminDashboard() {
     {
       name: "Products",
       count: totalProducts,
-    },
-  ];
-
-  //users
-
-  const usersData = [
-    {
-      id: "u1",
-      name: "John Carter",
-      email: "john.carter@example.com",
-      role: "Customer",
-      image:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&q=80",
-    },
-    {
-      id: "u2",
-      name: "Sophia Martinez",
-      email: "sophia.m@example.com",
-      role: "Customer",
-      image:
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&q=80",
-    },
-    {
-      id: "u3",
-      name: "David Wilson",
-      email: "david.wilson@example.com",
-      role: "Customer",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80",
-    },
-    {
-      id: "u4",
-      name: "Emily Johnson",
-      email: "emily.j@example.com",
-      role: "Customer",
-      image:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80",
     },
   ];
 
@@ -232,7 +197,7 @@ export default function AdminDashboard() {
             )}
             {activeTab == "Users" && (
               <AdminUsersTable
-                users={usersData}
+                users={usersList}
                 onEdit={(id) => console.log("Edit", id)}
                 onDelete={(id) => console.log("Delete", id)}
               />

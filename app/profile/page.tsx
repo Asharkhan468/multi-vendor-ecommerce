@@ -1,15 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Camera, Pencil, Check, User, Mail } from "lucide-react";
 
 export default function ProfilePage() {
-  const [name, setName] = useState("Ashar Khan");
-  const [email] = useState("ashar@example.com"); // read-only
-  const [role] = useState("Admin"); // read-only
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+  const [profile , setProfile]=useState<any>(null);
 
   const [editName, setEditName] = useState(false);
   const [editPhoto, setEditPhoto] = useState(false);
+
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("user") as any);
+    setName(data?.name);
+    setRole(data?.role);
+    setEmail(data?.email);
+    setProfile(data?.photo)
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50 text-gray-900">
@@ -28,7 +37,7 @@ export default function ProfilePage() {
           {/* Left Side: Profile Image */}
           <div className="relative w-64 h-64 flex-shrink-0">
             <img
-              src="/profile.png"
+              src={profile}
               className="w-64 h-64 rounded-full object-cover border-4 border-white shadow-xl transition-transform duration-300 hover:scale-105"
               alt="Profile"
             />

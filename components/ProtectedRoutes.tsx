@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, role }: any) => {
     }
 
     if (role && authUser.role !== role) {
-      toast.error(`Only ${role} can access this route!`);
+      toast.error(`You are not authorize to access this route!`);
       router.push("/");
       return;
     }

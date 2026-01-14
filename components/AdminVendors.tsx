@@ -1,6 +1,6 @@
 "use client";
 
-import { blockUser } from "@/libs/api";
+import { blockUser, deleteUser } from "@/libs/api";
 import {
   Edit,
   Trash2,
@@ -9,6 +9,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 type Vendor = {
   id: string;
@@ -34,21 +35,31 @@ export default function AdminVendorsTable({
     text.charAt(0).toUpperCase() + text.slice(1);
 
   const toggleVendorStatus = async (vendor: any) => {
-    const newStatus = vendor.status === "active" ? "Inactive" : "Active";
+    const newStatus = vendor.status === "active" ? "inactive" : "active";
     try {
       setVendor((prev: any) =>
-        prev.map((v: any) =>
+        prev?.map((v: any) =>
           v._id === vendor._id ? { ...v, status: newStatus } : v
         )
       );
-      const res = await blockUser(vendor._id);
-      console.log(res);
+      const res = await blockUser(vendor._id , newStatus);
+       if(res.success){
+          toast.success(res.message);
+        }
     } catch (error) {
       console.error(error);
-      alert("Status update failed");
+      toast.success("Status update failed");
     }
   };
+ const handleDeleteUser = async (id: any) => {
+    const res = await deleteUser(id);
 
+    if (res.success) {
+      toast.success(res.message);
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   return (
     <div className="w-full bg-white shadow-lg rounded-xl p-6 border border-gray-200">
@@ -123,7 +134,7 @@ export default function AdminVendorsTable({
                     </button>
 
                     <button
-                      onClick={() => onDelete(vendor._id)}
+                      onClick={() => handleDeleteUser(vendor._id)}
                       className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition"
                     >
                       <Trash2 size={18} className="text-red-600" />

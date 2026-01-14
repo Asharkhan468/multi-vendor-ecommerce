@@ -26,6 +26,7 @@ export default function OrdersDashboard() {
     const fetchOrders = async () => {
       setLoading(true);
       const res = await getVendorOrders();
+      console.log(res , "===> api response")
       if (res.success) {
         setOrders(res.data.orders);
       } else if (res.blocked) {
@@ -42,6 +43,8 @@ export default function OrdersDashboard() {
 
     fetchOrders();
   }, []);
+
+  console.log(orders)
 
   const handleStatusUpdate = async (newStatus: any, orderId: any) => {
     const res = await updateOrderStatus(newStatus, orderId);
