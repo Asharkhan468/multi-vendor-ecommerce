@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/UserHeader";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -7,6 +7,15 @@ import { createOrder } from "@/libs/api";
 
 export default function CheckoutPage() {
   const [search, setSearch] = useState("");
+  const [checkoutTotal, setCheckoutTotal] = useState(0);
+
+
+  useEffect(() => {
+  const total = Number(localStorage.getItem("checkoutTotal") || 0);
+  setCheckoutTotal(total);
+}, []);
+
+
 
   const [form, setForm] = useState({
     fullName: "",
@@ -19,7 +28,7 @@ export default function CheckoutPage() {
     payment: "cod",
   });
 
-  const checkoutTotal = Number(localStorage.getItem("checkoutTotal"));
+  // const checkoutTotal = Number(localStorage.getItem("checkoutTotal"));
   const router = useRouter();
 
   const handleChange = (

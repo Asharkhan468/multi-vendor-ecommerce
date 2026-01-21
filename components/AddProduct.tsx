@@ -5,6 +5,7 @@ import { Upload, X } from "lucide-react";
 import {
   createProduct,
   getAllCategories,
+  sendImageToText,
   updateProductWithId,
 } from "@/libs/api";
 import { toast } from "react-toastify";
@@ -17,6 +18,7 @@ export default function AddProduct({ onClose, editProduct }: any) {
   const [stock, setStock] = useState("");
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false); // AI loading
   const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
@@ -26,15 +28,9 @@ export default function AddProduct({ onClose, editProduct }: any) {
       setPrice(editProduct.price);
       setCategory(editProduct.category);
       setStock(editProduct.stock);
-      setCategory(editProduct.category);
 
       if (editProduct.image?.url) {
-        setImages([
-          {
-            file: null, 
-            preview: editProduct.image.url,
-          },
-        ]);
+        setImages([{ file: null, preview: editProduct.image.url }]);
       }
     }
   }, [editProduct]);
@@ -42,15 +38,8 @@ export default function AddProduct({ onClose, editProduct }: any) {
   useEffect(() => {
     const fetchData = async () => {
       const res = await getAllCategories();
-
-      if (res.success) {
-        setCategoryList(res.data.data);
-        setLoading(false);
-      } else {
-        console.log(res.message);
-      }
+      if (res.success) setCategoryList(res.data.data);
     };
-
     fetchData();
   }, []);
 
@@ -60,23 +49,14 @@ export default function AddProduct({ onClose, editProduct }: any) {
         toast.error("Please fill all fields!");
         return;
       }
-
-      if (!images || images.length === 0) {
-        toast.error("Please upload an image!");
-        return;
-      }
-
-      if (!editProduct && !images[0]?.file) {
+      if (!images.length || (!editProduct && !images[0]?.file)) {
         toast.error("Please upload an image!");
         return;
       }
 
       setLoading(true);
-
       let res;
-
       if (editProduct) {
-        // UPDATE PRODUCT
         res = await updateProductWithId(
           editProduct._id,
           title,
@@ -84,17 +64,16 @@ export default function AddProduct({ onClose, editProduct }: any) {
           price,
           category,
           stock,
-          images[0].file
+          images[0].file,
         );
       } else {
-        // CREATE PRODUCT
         res = await createProduct(
           title,
           desc,
           price,
           category,
           stock,
-          images[0].file
+          images[0].file,
         );
       }
 
@@ -102,7 +81,7 @@ export default function AddProduct({ onClose, editProduct }: any) {
         toast.success(
           editProduct
             ? "Product updated successfully"
-            : "Product added successfully"
+            : "Product added successfully",
         );
         onClose();
       } else {
@@ -115,10 +94,34 @@ export default function AddProduct({ onClose, editProduct }: any) {
     }
   };
 
+  // -------- AI Function --------
+  const handleAIGenerate = async () => {
+    if (!images[0]?.file) {
+      toast.error("Please upload an image first!");
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const result = await sendImageToText(images[0].file);
+
+      if (result.success) {
+        // Fill title and description automatically
+        setTitle(result.title || "");
+        toast.success("AI generated title!");
+      } else {
+        toast.error(result.message || "AI generation failed");
+      }
+    } catch (error) {
+      toast.error("Error generating with AI");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4 z-50">
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 relative animate-scaleIn">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition"
@@ -127,19 +130,50 @@ export default function AddProduct({ onClose, editProduct }: any) {
         </button>
 
         <h2 className="text-2xl font-bold mb-4 text-gray-900">
-        {editProduct?"Edit Product":"Add New Product"}
+          {editProduct ? "Edit Product" : "Add New Product"}
         </h2>
 
-        {/* Form */}
         <div className="flex flex-col gap-4">
-          {/* Title */}
-          <input
-            type="text"
-            placeholder="Product Title"
-            className="input-field"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          {/* Title + AI Button */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <input
+              type="text"
+              placeholder="Product Title"
+              className="input-field flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <button
+              type="button"
+              onClick={handleAIGenerate}
+              disabled={aiLoading}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium px-4 py-3 rounded-lg shadow-lg transition-all duration-300 w-full sm:w-auto"
+            >
+              {aiLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span className="text-sm">Generate with AI</span>
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Description */}
           <textarea
             placeholder="Product Description"
@@ -147,6 +181,7 @@ export default function AddProduct({ onClose, editProduct }: any) {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
+
           {/* Price + Stock */}
           <div className="grid grid-cols-2 gap-4">
             <input
@@ -156,7 +191,6 @@ export default function AddProduct({ onClose, editProduct }: any) {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
-
             <input
               type="number"
               placeholder="Stock"
@@ -165,64 +199,26 @@ export default function AddProduct({ onClose, editProduct }: any) {
               onChange={(e) => setStock(e.target.value)}
             />
           </div>
+
           {/* Category */}
-          <div className="relative">
-            <div className="relative">
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 
-               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500
-               appearance-none"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="" disabled>
-                  Select Category
-                </option>
-                {categoryList.map((cat: any, idx: any) => (
-                  <option key={idx} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+          <select
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700
+            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500
+            appearance-none"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            {categoryList.map((cat: any, idx: any) => (
+              <option key={idx} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
 
-              {/* Arrow Icon */}
-              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Arrow Icon */}
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          </div>
-          {/* Image Upload Box */}
+          {/* Image Upload */}
           <label className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition relative">
             {!images.length ? (
               <>
@@ -236,9 +232,8 @@ export default function AddProduct({ onClose, editProduct }: any) {
                   accept=".jpg,.jpeg,.png"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
+                    if (file)
                       setImages([{ file, preview: URL.createObjectURL(file) }]);
-                    }
                   }}
                 />
               </>
@@ -259,6 +254,7 @@ export default function AddProduct({ onClose, editProduct }: any) {
             )}
           </label>
 
+          {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={loading}
@@ -267,7 +263,7 @@ export default function AddProduct({ onClose, editProduct }: any) {
             {loading ? (
               <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              `${editProduct?"Update Product":"Add Product"}`
+              `${editProduct ? "Update Product" : "Add Product"}`
             )}
           </button>
         </div>

@@ -13,25 +13,42 @@ type HeaderProps = {
 export default function Header({ search, setSearch }: HeaderProps) {
   const router = useRouter();
   const [cart, setCart] = useState([]);
-  const [orders ,setOrders]=useState([]);
+  const [orders, setOrders] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<any>("");
-  const [role , setRole]=useState("");
-  const dropdownRef = useRef(null);
+  const [role, setRole] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-      const fetchOrders = async () => {
-        const res = await getUserOrders();
-        if (res.success) {
-          setOrders(res.data.orders);
-        } else {
-          console.log(res.message);
-        }
-      };
-  
-      fetchOrders();
-    }, []);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        event.target instanceof Node &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const res = await getUserOrders();
+      if (res.success) {
+        setOrders(res.data.orders);
+      } else {
+        console.log(res.message);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   useEffect(() => {
     // Check token for login
@@ -39,35 +56,13 @@ export default function Header({ search, setSearch }: HeaderProps) {
     const user = JSON.parse(localStorage.getItem("user") as any);
     const image = user?.photo;
     setIsLoggedIn(!!token);
-    setRole(user?.role)
+    setRole(user?.role);
     setProfile(image);
-
-
 
     // Get cart from localStorage
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCart(cart);
   }, []);
-
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      event.target instanceof Node &&
-      !dropdownRef.current.contains(event.target)
-    ) {
-      setProfileOpen(false);
-    }
-  };
-
-  document.addEventListener("mousedown", handleClickOutside);
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
-
-  
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -99,7 +94,7 @@ useEffect(() => {
                 className="w-full bg-white text-gray-800 pl-10 pr-4 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
-            {isLoggedIn && role=="customer"? (
+            {isLoggedIn && role == "customer" ? (
               <div className="relative" ref={dropdownRef}>
                 <img
                   src={profile}
@@ -116,12 +111,14 @@ useEffect(() => {
                     >
                       Profile
                     </button>
-                   {orders.length>0 && <button
-                      onClick={() => router.push("/orderStatus")}
-                      className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-2"
-                    >
-                      Order Status
-                    </button>}
+                    {orders.length > 0 && (
+                      <button
+                        onClick={() => router.push("/orderStatus")}
+                        className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-2"
+                      >
+                        Order Status
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         handleLogout();
@@ -181,13 +178,6 @@ useEffect(() => {
                 Login
               </button>
             )}
-
-            {/* Order Status Icon */}
-            <PackageSearch
-              size={26}
-              className="cursor-pointer"
-              onClick={() => router.push("/orderStatus")}
-            />
 
             {/* Cart */}
             <div

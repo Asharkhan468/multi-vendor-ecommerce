@@ -578,3 +578,37 @@ export const getUserOrders = async () => {
     return { success: false, message: "Something went wrong" };
   }
 };
+
+export const sendImageToText = async (file) => {
+  if (!file) {
+    return { success: false, message: "No image file provided" };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch(`${baseUrl}api/generateCaption`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      return { success: false, message: text || "Failed to process image" };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      title: data.title,
+      description: data.description,
+    };
+  } catch (error) {
+    console.error("Error sending image:", error);
+    return { success: false, message: "Something went wrong" };
+  }
+};
+
+
+
