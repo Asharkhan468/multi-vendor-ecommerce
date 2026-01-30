@@ -172,7 +172,7 @@ export default function Header({ search, setSearch }: HeaderProps) {
               />
             ) : (
               <button
-                onClick={() => router.push("/login")}
+                onClick={() => router.push("/auth/login")}
                 className="bg-white text-indigo-600 px-3 py-1 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
                 Login
