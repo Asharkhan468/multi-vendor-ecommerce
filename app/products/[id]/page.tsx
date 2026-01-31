@@ -1,103 +1,43 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ShoppingCart } from "lucide-react";
-import { useParams, useRouter } from "next/navigation"; // App Router
+import { ShoppingCart, Star } from "lucide-react";
+import { useParams } from "next/navigation";
 import Header from "@/components/UserHeader";
-import { getAllProduct } from "@/libs/api";
+import { createReview, getAllProduct } from "@/libs/api";
 import { toast } from "react-toastify";
 
-type Product = {
-  id: string;
-  title: string;
-  price: number;
-  image: string;
-  category: string;
-  description: string;
-};
-
-// const demoProducts: Product[] = [
-//   {
-//     id: "1",
-//     title: "Smartphone X",
-//     price: 799,
-//     image: "https://via.placeholder.com/600x400?text=Smartphone+X",
-//     category: "Electronics",
-//     description:
-//       "Smartphone X is the latest mobile device with advanced features and premium build quality.",
-//   },
-//   {
-//     id: "2",
-//     title: "Wireless Headphones",
-//     price: 199,
-//     image: "https://via.placeholder.com/600x400?text=Headphones",
-//     category: "Electronics",
-//     description:
-//       "Enjoy crystal-clear sound and wireless convenience with these premium headphones.",
-//   },
-//   {
-//     id: "3",
-//     title: "Gaming Laptop",
-//     price: 1299,
-//     image: "https://via.placeholder.com/600x400?text=Gaming+Laptop",
-//     category: "Computers",
-//     description:
-//       "High-performance gaming laptop with latest GPU and powerful CPU for smooth gameplay.",
-//   },
-//   {
-//     id: "4",
-//     title: "Smart Watch",
-//     price: 299,
-//     image: "https://via.placeholder.com/600x400?text=Smart+Watch",
-//     category: "Wearables",
-//     description:
-//       "Smart Watch keeps you connected and tracks your fitness goals effortlessly.",
-//   },
-// ];
-
-interface Props {
-  params: { id: string }; // App Router params
-}
-
 export default function ProductDetailPage() {
-  const router = useRouter();
   const { id } = useParams();
   const [search, setSearch] = useState("");
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<any[]>([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await getAllProduct();
-
       if (res.success) {
         setProducts(res.data.products);
-        setLoading(false);
-      } else {
-        console.log(res.message);
       }
     };
-
     fetchData();
   }, []);
 
-  const product: any = products.find((p: any) => p._id === id);
+  const product = products.find((p: any) => p._id === id);
 
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Product not found.
+        Product not found
       </div>
     );
   }
 
-  //handle add to cart
-
   const handleAddCart = (item: any) => {
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-
     const alreadyExists = existingCart.find(
-      (cartItem: any) => cartItem._id === item._id
+      (cartItem: any) => cartItem._id === item._id,
     );
 
     if (alreadyExists) {
@@ -105,44 +45,188 @@ export default function ProductDetailPage() {
       return;
     }
 
-    existingCart.push({
-      ...item,
-      quantity: 1,
-    });
-
+    existingCart.push({ ...item, quantity: 1 });
     localStorage.setItem("cart", JSON.stringify(existingCart));
+    toast.success("Added to cart");
+  };
+  const handleSubmit = async (productId: any) => {
+    console.log("Product id ==> ", productId);
+    const result = await createReview(productId, comment, rating);
+    if (result?.review) {
+      toast.success("Review added sucessfully!");
+      setComment("");
+      setRating(5);
+    } else {
+      toast.error("Error adding review");
+    }
+  };
+
+  const formatDate = (dateString: any) => {
+    const date = new Date(dateString);
+
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <Header search={search} setSearch={setSearch} />
 
-      {/* Product Detail */}
-      <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
-        <img
-          src={product.image.url}
-          alt={product.title}
-          className="w-full h-96 object-cover rounded-3xl shadow-xl"
-        />
+      {/* Product Info */}
+      <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Product Image */}
+        <div className="overflow-hidden rounded-4xl shadow-2xl hover:scale-105 transition-transform duration-300">
+          <img
+            src={product.image.url}
+            alt={product.title}
+            className="w-full h-[450px] object-cover"
+          />
+        </div>
 
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            {product.title}
-          </h2>
-          <p className="text-gray-500 mb-4">{product.category}</p>
-          <span className="text-2xl font-bold text-gray-900 mb-6 block">
-            ${product.price}
-          </span>
+        {/* Product Details */}
+        <div className="flex flex-col justify-between">
+          <div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">
+              {product.title}
+            </h2>
+            <span className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
+              {product.category}
+            </span>
 
-          <p className="text-gray-700 mb-6">{product.description}</p>
+            {/* Rating */}
+            <div className="flex items-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star
+                  key={i}
+                  size={20}
+                  className="fill-yellow-400 text-yellow-400"
+                />
+              ))}
+              <span className="text-sm text-gray-500 ml-2">(5.0)</span>
+            </div>
 
-          <button onClick={()=>{handleAddCart(product)}} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition">
-            <ShoppingCart size={20} />
+            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600 block mb-6">
+              ${product.price}
+            </span>
+
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              {product.description}
+            </p>
+          </div>
+
+          <button
+            onClick={() => handleAddCart(product)}
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-3xl flex items-center gap-3 justify-center shadow-lg hover:scale-105 transition-all duration-300"
+          >
+            <ShoppingCart size={22} />
             Add to Cart
           </button>
         </div>
       </main>
+
+      {/* Reviews Section */}
+      <section className="max-w-7xl mx-auto px-6 py-14">
+        <h3 className="text-3xl font-bold mb-8 text-gray-900">
+          Customer Reviews
+        </h3>
+
+        {/* Reviews List */}
+        <div className="space-y-6 mb-12">
+          {product?.reviews.length === 0 && (
+            <p className="text-gray-500">No reviews yet</p>
+          )}
+
+          {product?.reviews.map((review: any, index: any) => (
+            <div
+              key={index}
+              className="bg-white p-6 rounded-3xl shadow-md hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="flex items-start justify-between mb-3">
+                {/* Left side: Profile + Name + Rating */}
+                <div className="flex items-start gap-3">
+                  {/* Profile Image */}
+                  <img
+                    src={review.userPhoto || "/avatar.png"} // fallback image
+                    alt={review.userName}
+                    className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                  />
+
+                  <div>
+                    <h5 className="font-semibold text-gray-900">
+                      {review.userName}
+                    </h5>
+
+                    <div className="flex gap-1 mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={
+                            i < review.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-400"
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <span className="text-sm text-gray-400">
+                  {formatDate(review.date)}
+                </span>
+              </div>
+
+              {/* Comment */}
+              <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Add Review */}
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-3xl shadow-lg w-full">
+          <h4 className="font-semibold mb-5 text-gray-900 text-lg">
+            Write a Review
+          </h4>
+          <div className="grid gap-4">
+            <textarea
+              placeholder="Share your experience..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full px-4 py-3 border rounded-2xl resize-none text-black border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+              rows={4}
+            />
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    size={24}
+                    onClick={() => setRating(i)}
+                    className={`cursor-pointer transition-all duration-200 ${
+                      i <= rating
+                        ? "fill-yellow-400 text-yellow-400 scale-110"
+                        : "text-gray-500"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={() => handleSubmit(product._id)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 transition-all duration-300"
+              >
+                Submit Review
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

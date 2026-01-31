@@ -68,7 +68,7 @@ export const createProduct = async (
   price,
   category,
   stock,
-  selectedFile
+  selectedFile,
 ) => {
   try {
     const formData = new FormData();
@@ -277,7 +277,7 @@ export const updateProductWithId = async (
   price,
   category,
   stock,
-  selectedFile
+  selectedFile,
 ) => {
   const token = localStorage.getItem("token");
 
@@ -610,5 +610,22 @@ export const sendImageToText = async (file) => {
   }
 };
 
+export const createReview = async (productId, comment, rating) => {
+  try {
+    const token = localStorage.getItem("token");
 
+    const res = await fetch(`${baseUrl}api/products/${productId}/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ comment, rating }),
+    });
 
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
