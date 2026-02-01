@@ -167,9 +167,11 @@ export default function Header({ search, setSearch }: HeaderProps) {
             {isLoggedIn ? (
               <img
                 src="/profile.png"
-                onClick={() => router.push("/profile")}
+                onClick={() => setProfileOpen(!profileOpen)}
                 className="w-9 h-9 rounded-full border border-white cursor-pointer"
               />
+
+
             ) : (
               <button
                 onClick={() => router.push("/auth/login")}
@@ -178,6 +180,50 @@ export default function Header({ search, setSearch }: HeaderProps) {
                 Login
               </button>
             )}
+
+             {profileOpen && (
+                    <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setProfileOpen(false)}>
+    <div
+      className="absolute bottom-0 left-0 w-full bg-white text-gray-800 rounded-t-2xl shadow-xl border-t border-gray-200 z-50 animate-slideUp"
+      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+    >
+      <button
+        onClick={() => {
+          router.push("/profile");
+          setProfileOpen(false);
+        }}
+        className="w-full text-left px-6 py-4 hover:bg-indigo-50 flex items-center gap-3 text-lg"
+      >
+        <i className="fas fa-user"></i>
+        Profile
+      </button>
+
+      {orders.length > 0 && (
+        <button
+          onClick={() => {
+            router.push("/orderStatus");
+            setProfileOpen(false);
+          }}
+          className="w-full text-left px-6 py-4 hover:bg-indigo-50 flex items-center gap-3 text-lg"
+        >
+          <i className="fas fa-box"></i>
+          Order Status
+        </button>
+      )}
+
+      <button
+        onClick={() => {
+          handleLogout();
+          setProfileOpen(false);
+        }}
+        className="w-full text-left px-6 py-4 hover:bg-red-100 text-red-600 flex items-center gap-3 text-lg"
+      >
+        <i className="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </div>
+  </div>
+                )}
 
             {/* Cart */}
             <div

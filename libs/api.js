@@ -629,3 +629,25 @@ export const createReview = async (productId, comment, rating) => {
     console.log(error);
   }
 };
+
+export const analyzeReviews = async (productId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `${baseUrl}api/analyze/${productId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+    return data;
+
+  } catch (error) {
+    console.log("Review analysis error:", error);
+  }
+};

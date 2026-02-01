@@ -209,42 +209,53 @@ export default function HomePage() {
             <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {filteredProducts.map((product: any) => (
-              <div
-                key={product._id}
-                className="bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 cursor-pointer"
-              >
-                <img
-                  src={product.image.url}
-                  alt={product.title}
-                  onClick={() => router.push(`/products/${product._id}`)}
-                  className="w-full h-56 object-cover"
-                />
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  {filteredProducts.map((product: any) => (
+    <div
+      key={product._id}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
+    >
+      {/* Image */}
+      <div
+        onClick={() => router.push(`/products/${product._id}`)}
+        className="relative overflow-hidden cursor-pointer"
+      >
+        <img
+          src={product.image.url}
+          alt={product.title}
+          className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
 
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {product.title}
-                  </h3>
-                  <p className="text-gray-500">{product.category}</p>
+      {/* Content */}
+      <div className="p-4 flex flex-col gap-2">
+        <h3 className="text-base font-semibold text-gray-800 line-clamp-1">
+          {product.title}
+        </h3>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-700">
-                      ${product.price}
-                    </span>
+        <p className="text-sm text-gray-500">
+          {product.category}
+        </p>
 
-                    <button
-                      onClick={() => handleAddCart(product)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-2 hover:from-blue-600 hover:to-indigo-600 transition"
-                    >
-                      <ShoppingCart size={18} />
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-lg font-bold text-gray-900">
+            ${product.price}
+          </span>
+
+          <button
+            onClick={() => handleAddCart(product)}
+            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full 
+            bg-gray-900 text-white hover:bg-gray-800 transition"
+          >
+            <ShoppingCart size={16} />
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
         )}
       </main>
     </div>
