@@ -126,7 +126,7 @@ export default function VendorDashboard() {
                         onClick={(e) => {
                           e.stopPropagation();
                           setOpenMenuId(
-                            openMenuId === product._id ? null : product._id
+                            openMenuId === product._id ? null : product._id,
                           );
                         }}
                         className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -163,6 +163,20 @@ export default function VendorDashboard() {
                           alt={product.title}
                           className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
                         />
+
+                        {/* Price Badge */}
+                        {/* Price Badge */}
+                        {product.priceStatus === "high" && (
+                          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                            Price Higher than avg market
+                          </span>
+                        )}
+
+                        {product.priceStatus === "low" && (
+                          <span className="absolute top-3 left-3 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                            Price Lower than avg market
+                          </span>
+                        )}
                       </div>
 
                       {/* Details */}

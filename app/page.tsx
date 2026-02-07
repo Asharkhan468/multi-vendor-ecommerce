@@ -73,7 +73,7 @@ export default function HomePage() {
   }
   if (priceFilter === "medium") {
     filteredProducts = filteredProducts.filter(
-      (p: any) => p.price >= 500 && p.price <= 1000
+      (p: any) => p.price >= 500 && p.price <= 1000,
     );
   }
   if (priceFilter === "high") {
@@ -90,7 +90,7 @@ export default function HomePage() {
   if (sort === "newest") {
     filteredProducts.sort(
       (a: any, b: any) =>
-        new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+        new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime(),
     );
   }
 
@@ -115,7 +115,7 @@ export default function HomePage() {
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
     const alreadyExists = existingCart.find(
-      (cartItem: any) => cartItem._id === item._id
+      (cartItem: any) => cartItem._id === item._id,
     );
 
     if (alreadyExists) {
@@ -209,53 +209,57 @@ export default function HomePage() {
             <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  {filteredProducts.map((product: any) => (
-    <div
-      key={product._id}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
-    >
-      {/* Image */}
-      <div
-        onClick={() => router.push(`/products/${product._id}`)}
-        className="relative overflow-hidden cursor-pointer"
-      >
-        <img
-          src={product.image.url}
-          alt={product.title}
-          className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredProducts.map((product: any) => (
+              <div
+                key={product._id}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative"
+              >
+                {/* Image */}
+                <div
+                  onClick={() => router.push(`/products/${product._id}`)}
+                  className="relative overflow-hidden cursor-pointer"
+                >
+                  <img
+                    src={product.image.url}
+                    alt={product.title}
+                    className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
 
-      {/* Content */}
-      <div className="p-4 flex flex-col gap-2">
-        <h3 className="text-base font-semibold text-gray-800 line-clamp-1">
-          {product.title}
-        </h3>
+                  {/* Price Badges */}
+                  {product.priceStatus === "low" && (
+                    <span className="absolute top-3 left-3 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                      Best Deal 🔥
+                    </span>
+                  )}
+                </div>
 
-        <p className="text-sm text-gray-500">
-          {product.category}
-        </p>
+                {/* Content */}
+                <div className="p-4 flex flex-col gap-2">
+                  <h3 className="text-base font-semibold text-gray-800 line-clamp-1">
+                    {product.title}
+                  </h3>
 
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-lg font-bold text-gray-900">
-            ${product.price}
-          </span>
+                  <p className="text-sm text-gray-500">{product.category}</p>
 
-          <button
-            onClick={() => handleAddCart(product)}
-            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full 
-            bg-gray-900 text-white hover:bg-gray-800 transition"
-          >
-            <ShoppingCart size={16} />
-            Add
-          </button>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-lg font-bold text-gray-900">
+                      ${product.price}
+                    </span>
 
+                    <button
+                      onClick={() => handleAddCart(product)}
+                      className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full 
+            bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer"
+                    >
+                      <ShoppingCart size={16} />
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </main>
     </div>

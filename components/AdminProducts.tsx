@@ -196,7 +196,7 @@ export default function AdminProductsTable({
               <div className="flex gap-4 items-center">
                 {product.image ? (
                   <img
-                    src={product.image}
+                    src={product.image.url}
                     alt={product.title}
                     className="w-20 h-20 rounded-lg object-cover border"
                   />

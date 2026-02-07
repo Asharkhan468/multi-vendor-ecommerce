@@ -39,19 +39,19 @@ export default function AdminVendorsTable({
     try {
       setVendor((prev: any) =>
         prev?.map((v: any) =>
-          v._id === vendor._id ? { ...v, status: newStatus } : v
-        )
+          v._id === vendor._id ? { ...v, status: newStatus } : v,
+        ),
       );
-      const res = await blockUser(vendor._id , newStatus);
-       if(res.success){
-          toast.success(res.message);
-        }
+      const res = await blockUser(vendor._id, newStatus);
+      if (res.success) {
+        toast.success(res.message);
+      }
     } catch (error) {
       console.error(error);
       toast.success("Status update failed");
     }
   };
- const handleDeleteUser = async (id: any) => {
+  const handleDeleteUser = async (id: any) => {
     const res = await deleteUser(id);
 
     if (res.success) {
@@ -157,7 +157,7 @@ export default function AdminVendorsTable({
       </div>
 
       {/* MOBILE CARDS */}
-      <div className="md:hidden space-y-4">
+      {/* <div className="md:hidden space-y-4">
         {vendors?.length > 0 ? (
           vendors.map((vendor:any) => (
             <div
@@ -165,9 +165,9 @@ export default function AdminVendorsTable({
               className="border rounded-xl p-4 shadow-sm bg-gray-50"
             >
               <div className="flex gap-4 items-center">
-                {vendor.image ? (
+                {vendor.profilePhoto ? (
                   <img
-                    src={vendor.image}
+                    src={vendor.profilePhoto}
                     alt={vendor.shopName}
                     className="w-20 h-20 rounded-lg object-cover border"
                   />
@@ -185,12 +185,12 @@ export default function AdminVendorsTable({
                   <p className="text-gray-700 text-sm">{vendor.email}</p>
                   <p
                     className={`font-bold ${
-                      vendor.status === "Active"
+                      vendor.status === "active"
                         ? "text-green-600"
                         : "text-red-600"
                     }`}
                   >
-                    {vendor.status}
+                    {capitalizeFirst(vendor.status)}
                   </p>
                 </div>
               </div>
@@ -209,6 +209,91 @@ export default function AdminVendorsTable({
                 >
                   <Trash2 size={18} className="text-red-600" />
                 </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 font-medium">
+            No vendors found.
+          </p>
+        )}
+      </div> */}
+
+      {/* MOBILE CARDS */}
+      <div className="md:hidden space-y-4">
+        {vendors?.length > 0 ? (
+          vendors.map((vendor: any) => (
+            <div
+              key={vendor._id}
+              className="border rounded-xl p-4 shadow-sm bg-gray-50"
+            >
+              {/* TOP INFO */}
+              <div className="flex gap-4 items-center">
+                {vendor.profilePhoto ? (
+                  <img
+                    src={vendor.profilePhoto}
+                    alt={vendor.shopName}
+                    className="w-20 h-20 rounded-lg object-cover border"
+                  />
+                ) : (
+                  <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-lg border">
+                    <StoreIcon size={28} className="text-gray-500" />
+                  </div>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-600 text-sm truncate">
+                    {vendor.name}
+                  </p>
+                  <p className="text-gray-600 text-sm truncate">
+                    {vendor.email}
+                  </p>
+
+                  {/* STATUS BADGE */}
+                  <span
+                    className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                      vendor.status === "active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {capitalizeFirst(vendor.status)}
+                  </span>
+                </div>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="flex justify-between mt-4 items-center">
+                <div className="flex gap-3">
+                  {/* BLOCK / UNBLOCK */}
+                  <button
+                    title={
+                      vendor.status === "active"
+                        ? "Block vendor"
+                        : "Activate vendor"
+                    }
+                    onClick={() => toggleVendorStatus(vendor)}
+                    className={`p-2 rounded-lg transition ${
+                      vendor.status === "active"
+                        ? "bg-red-100 hover:bg-red-200"
+                        : "bg-green-100 hover:bg-green-200"
+                    }`}
+                  >
+                    {vendor.status === "active" ? (
+                      <Ban size={18} className="text-red-600" />
+                    ) : (
+                      <CheckCircle size={18} className="text-green-600" />
+                    )}
+                  </button>
+
+                  {/* DELETE */}
+                  <button
+                    onClick={() => handleDeleteUser(vendor._id)}
+                    className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition"
+                  >
+                    <Trash2 size={18} className="text-red-600" />
+                  </button>
+                </div>
               </div>
             </div>
           ))
